@@ -1,0 +1,297 @@
+/* ── Google Fonts ─────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap');
+
+/* ── Design tokens ────────────────────────────────────────────────── */
+:root {
+  --bg:         #0d0f1a;
+  --bg2:        #141728;
+  --bg3:        #1c2033;
+  --border:     #2a2d45;
+  --accent:     #e63946;
+  --accent2:    #22d3ee;
+  --gold:       #f59e0b;
+  --text:       #e8eaf0;
+  --text-dim:   #8891aa;
+  --success:    #22c55e;
+  --radius:     12px;
+  --shadow:     0 8px 32px rgba(0,0,0,0.45);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+}
+
+h1,h2,h3 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; }
+
+/* ── Page backgrounds ─────────────────────────────────────────────── */
+.page-bg {
+  min-height: 100vh;
+  background: radial-gradient(ellipse at 20% 50%, #1c1240 0%, var(--bg) 60%);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 2rem 1rem;
+}
+.home-bg {
+  min-height: 100vh;
+  background: radial-gradient(ellipse at 50% 30%, #1f1147 0%, #0d0f1a 70%);
+  display: flex; align-items: center; justify-content: center;
+}
+.auction-bg {
+  min-height: 100vh;
+  background: radial-gradient(ellipse at 30% 20%, #1a0a2e 0%, var(--bg) 70%);
+}
+.captain-auction-bg {
+  min-height: 100vh;
+  background: radial-gradient(ellipse at 70% 30%, #0a1a2e 0%, var(--bg) 70%);
+}
+.dashboard-bg {
+  min-height: 100vh;
+  background: var(--bg);
+  padding: 1.5rem;
+}
+
+/* ── Cards & form ─────────────────────────────────────────────────── */
+.form-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: var(--shadow);
+}
+.form-title {
+  font-size: 1.8rem;
+  color: var(--accent);
+  margin-bottom: 1.5rem;
+}
+.form-grid { display: flex; flex-direction: column; gap: 1rem; }
+.form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+.form-group label {
+  font-size: 0.8rem; font-weight: 600;
+  color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px;
+}
+.form-group input,
+.form-group select {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text);
+  padding: 0.65rem 0.85rem; font-size: 0.95rem;
+  outline: none; transition: border-color 0.2s;
+}
+.form-group input:focus,
+.form-group select:focus { border-color: var(--accent2); }
+.form-group-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.color-row { display: flex; align-items: center; gap: 0.75rem; }
+
+/* ── Buttons ──────────────────────────────────────────────────────── */
+.btn-primary {
+  background: var(--accent); color: #fff;
+  border: none; border-radius: 8px;
+  padding: 0.75rem 1.5rem; font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.05rem; letter-spacing: 1px;
+  cursor: pointer; transition: opacity 0.2s;
+}
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-secondary {
+  background: transparent; color: var(--accent2);
+  border: 1px solid var(--accent2); border-radius: 8px;
+  padding: 0.7rem 1.4rem; font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem; letter-spacing: 1px; cursor: pointer;
+}
+.btn-accent {
+  background: var(--gold); color: #000;
+  border: none; border-radius: 8px;
+  padding: 0.7rem 1.2rem; font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem; letter-spacing: 1px; cursor: pointer;
+}
+.btn-outline {
+  background: transparent; color: var(--text);
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 0.5rem 1rem; cursor: pointer; font-size: 0.9rem;
+}
+.btn-sold  { background: #22c55e; color:#000; border:none; border-radius:8px; padding:0.8rem 1.6rem; font-family:'Bebas Neue',sans-serif; font-size:1.2rem; cursor:pointer; }
+.btn-unsold{ background: #ef4444; color:#fff; border:none; border-radius:8px; padding:0.8rem 1.6rem; font-family:'Bebas Neue',sans-serif; font-size:1.2rem; cursor:pointer; }
+.btn-pause { background: var(--gold); color:#000; border:none; border-radius:8px; padding:0.8rem 1.6rem; font-family:'Bebas Neue',sans-serif; font-size:1.1rem; cursor:pointer; }
+.btn-spin  { background: linear-gradient(135deg,#e63946,#c1121f); color:#fff; border:none; border-radius:50px; padding:0.9rem 2.5rem; font-family:'Bebas Neue',sans-serif; font-size:1.4rem; letter-spacing:2px; cursor:pointer; margin-top:1.2rem; box-shadow:0 4px 20px #e6394660; }
+.btn-ready { width:100%; background: var(--bg3); color:var(--text); border:2px solid var(--border); border-radius:8px; padding:1rem; font-family:'Bebas Neue',sans-serif; font-size:1.2rem; cursor:pointer; transition: all 0.2s; }
+.btn-ready.ready-active { background:var(--success); border-color:var(--success); color:#000; }
+.full-width { width: 100%; }
+.mt-2 { margin-top: 0.75rem; }
+
+/* ── Home ─────────────────────────────────────────────────────────── */
+.home-center { text-align: center; max-width: 500px; }
+.home-logo   { font-size: 5rem; margin-bottom: 0.5rem; }
+.home-title  { font-size: 5rem; color: var(--accent); line-height: 1; }
+.home-sub    { color: var(--text-dim); margin: 0.5rem 0 2.5rem; font-size: 1.1rem; }
+.home-buttons{ display: flex; flex-direction: column; gap: 1rem; }
+
+/* ── Lobby ────────────────────────────────────────────────────────── */
+.lobby-layout { display: grid; grid-template-columns: 440px 1fr; gap: 1.5rem; width:100%; max-width:1100px; padding-top:1.5rem; }
+.lobby-right  { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:1.5rem; }
+.lobby-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; }
+.lobby-state-badge { padding:0.3rem 0.8rem; border-radius:20px; font-size:0.8rem; font-weight:700; }
+.lobby-state-badge[data-state="WAITING"]       { background:#ef444422; color:#ef4444; }
+.lobby-state-badge[data-state="TEAMS_JOINED"]  { background:#f59e0b22; color:#f59e0b; }
+.lobby-state-badge[data-state="READY_TO_START"]{ background:#22c55e22; color:#22c55e; }
+.lobby-stats  { display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem; margin-bottom:1.2rem; }
+.stat-box     { background:var(--bg3); border-radius:8px; padding:0.75rem; text-align:center; }
+.stat-num     { display:block; font-family:'Bebas Neue',sans-serif; font-size:2rem; color:var(--accent2); }
+.stat-label   { font-size:0.75rem; color:var(--text-dim); text-transform:uppercase; }
+.captain-list { display:flex; flex-direction:column; gap:0.5rem; }
+.captain-row  { display:flex; align-items:center; gap:0.75rem; background:var(--bg3); border-radius:8px; padding:0.65rem 0.9rem; }
+.captain-color-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+.captain-info { flex:1; display:flex; flex-direction:column; }
+.captain-name { font-weight:700; font-size:0.95rem; }
+.captain-team { font-size:0.8rem; color:var(--text-dim); }
+.ready-badge  { font-size:0.8rem; font-weight:600; padding:0.25rem 0.6rem; border-radius:12px; }
+.ready-badge.ready     { background:#22c55e22; color:#22c55e; }
+.ready-badge.not-ready { background:#f59e0b22; color:#f59e0b; }
+.join-code-display { margin-top:1.2rem; background:var(--bg3); border-radius:8px; padding:0.75rem 1rem; text-align:center; font-size:0.9rem; color:var(--text-dim); }
+.join-code-display strong { color:var(--accent); font-size:1.3rem; letter-spacing:2px; font-family:'Bebas Neue',sans-serif; }
+.empty-lobby  { text-align:center; color:var(--text-dim); padding:1.5rem; font-size:0.9rem; }
+.join-code-row { display:flex; gap:0.6rem; margin-bottom:1rem; }
+.join-input   { flex:1; background:var(--bg3); border:1px solid var(--border); border-radius:8px; color:var(--text); padding:0.65rem; font-size:1.1rem; letter-spacing:3px; text-align:center; outline:none; }
+.tournament-badge { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:0.6rem 1rem; font-size:0.9rem; color:var(--accent2); margin-bottom:1rem; }
+.lobby-captain-card { width:100%; max-width:500px; background:var(--bg2); border-radius:var(--radius); border:1px solid var(--border); padding:2rem; }
+.team-hero { border:2px solid; border-radius:10px; padding:1.2rem; margin-bottom:1.5rem; text-align:center; }
+.budget-display { font-size:1.1rem; color:var(--text-dim); margin-top:0.4rem; }
+.lobby-waiting-text { text-align:center; color:var(--text-dim); font-size:0.9rem; margin-top:1rem; }
+
+/* ── Auction Room ─────────────────────────────────────────────────── */
+.auction-topbar { display:flex; align-items:center; justify-content:space-between; padding:0.85rem 1.5rem; background:var(--bg2); border-bottom:1px solid var(--border); }
+.auction-title  { font-family:'Bebas Neue',sans-serif; font-size:1.4rem; color:var(--accent); letter-spacing:2px; }
+.auction-topbar-stats { display:flex; gap:1.5rem; font-size:0.9rem; color:var(--text-dim); }
+.auction-main   { display:grid; grid-template-columns:1fr 340px 280px; gap:1.5rem; padding:1.5rem; min-height:calc(100vh - 60px); }
+.auction-left   { display:flex; flex-direction:column; align-items:center; gap:1.2rem; }
+.auction-center { display:flex; flex-direction:column; align-items:center; gap:1.2rem; }
+.auction-right  { overflow:hidden; }
+.auction-controls { display:flex; gap:0.75rem; flex-wrap:wrap; justify-content:center; }
+.current-bid-box { text-align:center; background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:1rem 1.5rem; width:100%; }
+.bid-amount  { font-family:'Bebas Neue',sans-serif; font-size:2.5rem; color:var(--gold); }
+.bid-leader  { font-size:0.9rem; font-weight:700; margin-top:0.25rem; }
+
+/* ── Spin Wheel ───────────────────────────────────────────────────── */
+.spin-wheel-wrap { display:flex; flex-direction:column; align-items:center; }
+.wheel-pointer   { font-size:1.8rem; color:var(--accent); margin-bottom:-0.3rem; }
+.wheel-disc      { border-radius:50%; box-shadow:0 0 40px #e6394640; }
+
+/* ── Player Card ──────────────────────────────────────────────────── */
+.player-reveal-card { position:relative; background:var(--bg2); border:2px solid; border-radius:var(--radius); padding:1.5rem; width:100%; max-width:320px; text-align:center; box-shadow:0 0 40px rgba(0,0,0,0.5); }
+.tier-ribbon { position:absolute; top:12px; right:12px; padding:0.25rem 0.7rem; border-radius:12px; font-size:0.75rem; font-weight:700; color:#000; font-family:'Bebas Neue',sans-serif; letter-spacing:1px; }
+.player-photo-wrap img { width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid var(--border); margin-bottom:0.75rem; }
+.player-avatar { width:100px; height:100px; border-radius:50%; background:var(--bg3); display:inline-flex; align-items:center; justify-content:center; font-size:2.5rem; font-family:'Bebas Neue',sans-serif; color:var(--text-dim); margin-bottom:0.75rem; }
+.player-card-name { font-size:1.8rem; color:var(--text); margin-bottom:0.25rem; }
+.player-card-role { font-size:0.85rem; color:var(--text-dim); background:var(--bg3); padding:0.2rem 0.6rem; border-radius:12px; }
+.player-stats-row { display:flex; gap:0.75rem; justify-content:center; margin:0.75rem 0; font-size:0.82rem; color:var(--text-dim); }
+.base-price-tag   { background:var(--bg3); border-radius:8px; padding:0.4rem 0.8rem; font-size:0.9rem; display:inline-block; margin-top:0.5rem; }
+.current-bid-tag  { background:var(--gold); color:#000; border-radius:8px; padding:0.4rem 0.8rem; font-weight:700; font-family:'Bebas Neue',sans-serif; font-size:1.1rem; display:inline-block; margin-top:0.5rem; }
+
+/* ── Bid Panel ────────────────────────────────────────────────────── */
+.bid-panel { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:1rem; width:100%; }
+.bid-panel-title { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; color:var(--text-dim); margin-bottom:0.75rem; letter-spacing:1px; }
+.bid-buttons-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; }
+.bid-captain-btn { background:var(--bg3); border:2px solid; border-radius:10px; padding:0.75rem; cursor:pointer; display:flex; flex-direction:column; gap:0.1rem; text-align:left; transition:all 0.15s; }
+.bid-btn-captain { font-weight:700; font-size:0.9rem; color:var(--text); }
+.bid-btn-team    { font-size:0.75rem; color:var(--text-dim); }
+.bid-btn-budget  { font-size:0.8rem; color:var(--accent2); margin-top:0.1rem; }
+
+/* ── Timer Ring ───────────────────────────────────────────────────── */
+.timer-ring-wrap { width:140px; height:140px; position:relative; display:flex; flex-direction:column; align-items:center; }
+.paused-label { font-family:'Bebas Neue',sans-serif; color:var(--gold); font-size:0.85rem; letter-spacing:2px; margin-top:0.4rem; }
+
+/* ── Team Budget Card ─────────────────────────────────────────────── */
+.team-budget-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:1.1rem; }
+.tbc-header      { margin-bottom:0.6rem; }
+.tbc-team-name   { font-family:'Bebas Neue',sans-serif; font-size:1.3rem; }
+.tbc-captain     { font-size:0.8rem; color:var(--text-dim); }
+.tbc-budget-row  { font-size:0.95rem; color:var(--text-dim); margin-bottom:0.5rem; }
+.tbc-slash       { margin:0 0.3rem; }
+.tbc-bar-bg      { background:var(--bg3); border-radius:50px; height:8px; overflow:hidden; }
+.tbc-bar-fill    { height:100%; border-radius:50px; }
+.tbc-bar-label   { font-size:0.75rem; color:var(--text-dim); margin-top:0.3rem; }
+.tbc-players-row { display:flex; gap:0.4rem; flex-wrap:wrap; margin-top:0.75rem; }
+.tbc-player-dot  { width:32px; height:32px; border-radius:50%; background:var(--bg3); overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:0.85rem; border:1px solid var(--border); }
+.tbc-player-dot img { width:100%; height:100%; object-fit:cover; }
+.tbc-more { width:32px; height:32px; border-radius:50%; background:var(--bg3); display:flex; align-items:center; justify-content:center; font-size:0.7rem; color:var(--text-dim); border:1px solid var(--border); }
+
+/* ── Auction Feed ─────────────────────────────────────────────────── */
+.auction-feed { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:1rem; height:100%; overflow:hidden; }
+.feed-title   { font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:1px; color:var(--text-dim); margin-bottom:0.75rem; }
+.feed-list    { display:flex; flex-direction:column; gap:0.4rem; max-height:calc(100vh - 120px); overflow-y:auto; }
+.feed-item    { display:flex; align-items:center; gap:0.6rem; padding:0.5rem 0.7rem; border-radius:8px; font-size:0.85rem; border:1px solid transparent; }
+.feed-item.sold   { background:#22c55e11; border-color:#22c55e33; }
+.feed-item.unsold { background:#ef444411; border-color:#ef444433; }
+.feed-icon    { font-size:1rem; }
+.feed-content { flex:1; display:flex; flex-direction:column; gap:0.1rem; }
+.feed-player  { font-weight:700; color:var(--text); }
+.feed-team    { font-size:0.8rem; font-weight:600; }
+.feed-price   { font-size:0.8rem; color:var(--gold); }
+.feed-unsold-tag { font-size:0.8rem; color:#ef4444; }
+.feed-tier    { font-size:0.7rem; padding:0.15rem 0.4rem; border-radius:8px; background:var(--bg3); color:var(--text-dim); }
+
+/* ── Dashboard ────────────────────────────────────────────────────── */
+.dashboard-header     { margin-bottom:1.5rem; }
+.dashboard-title      { font-size:2.5rem; color:var(--text); }
+.dashboard-stats-row  { display:flex; gap:1.5rem; color:var(--text-dim); margin-top:0.4rem; font-size:0.95rem; }
+.dashboard-layout     { display:grid; grid-template-columns:1fr 320px; gap:1.5rem; }
+.teams-grid           { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem; align-content:start; }
+.feed-sidebar         { position:sticky; top:1.5rem; }
+
+/* ── Player manage ────────────────────────────────────────────────── */
+.player-manage-layout { display:grid; grid-template-columns:480px 1fr; gap:1.5rem; width:100%; max-width:1200px; padding-top:1.5rem; }
+.player-list-panel    { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:1.5rem; }
+.panel-title          { font-family:'Bebas Neue',sans-serif; font-size:1.3rem; color:var(--text-dim); margin-bottom:1rem; }
+.player-grid          { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:0.75rem; }
+.player-mini-card     { background:var(--bg3); border-radius:10px; padding:0.75rem; display:flex; flex-direction:column; align-items:center; gap:0.4rem; text-align:center; }
+.player-thumb         { width:56px; height:56px; border-radius:50%; object-fit:cover; border:2px solid var(--border); }
+.player-thumb-placeholder { width:56px; height:56px; border-radius:50%; background:var(--bg2); display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:1.5rem; color:var(--text-dim); border:2px solid var(--border); }
+.player-mini-info     { display:flex; flex-direction:column; gap:0.15rem; }
+.player-mini-name     { font-weight:700; font-size:0.85rem; }
+.player-mini-role     { font-size:0.75rem; color:var(--text-dim); }
+.player-mini-price    { font-size:0.8rem; color:var(--accent2); }
+.tier-badge           { font-size:0.68rem; padding:0.15rem 0.4rem; border-radius:8px; font-weight:700; color:#000; font-family:'Bebas Neue',sans-serif; letter-spacing:0.5px; }
+.tab-row              { display:flex; gap:0.5rem; margin-bottom:1.2rem; }
+.tab-btn              { flex:1; background:var(--bg3); border:1px solid var(--border); color:var(--text-dim); border-radius:8px; padding:0.55rem; cursor:pointer; font-size:0.9rem; transition:all 0.15s; }
+.tab-btn.active       { background:var(--accent); border-color:var(--accent); color:#fff; }
+.csv-hint             { background:var(--bg3); border-radius:8px; padding:0.75rem; font-size:0.8rem; color:var(--text-dim); }
+.csv-hint code        { display:block; margin-top:0.4rem; color:var(--accent2); font-size:0.78rem; word-break:break-all; }
+.settings-grid        { display:flex; flex-direction:column; gap:1rem; margin-bottom:1rem; }
+.toggle-row           { display:flex; justify-content:space-between; align-items:center; background:var(--bg3); border-radius:8px; padding:0.65rem 0.9rem; }
+.toggle-row label     { font-size:0.9rem; }
+.toggle-row input[type=checkbox] { width:18px; height:18px; accent-color:var(--accent); }
+.btn-hint             { font-size:0.75rem; opacity:0.6; font-family:'DM Sans',sans-serif; }
+
+/* ── Captain auction ──────────────────────────────────────────────── */
+.captain-header       { background:var(--bg2); border-bottom:1px solid var(--border); padding:1rem 1.5rem; display:flex; justify-content:space-between; align-items:center; border-left:4px solid; }
+.captain-team-name    { font-family:'Bebas Neue',sans-serif; font-size:1.6rem; }
+.captain-budget-row   { display:flex; gap:1.5rem; font-size:0.9rem; color:var(--text-dim); }
+.captain-main         { display:grid; grid-template-columns:1fr 300px 1fr; gap:1.5rem; padding:1.5rem; }
+.captain-left, .captain-center, .captain-right { display:flex; flex-direction:column; align-items:center; gap:1rem; }
+.captain-bid-status   { text-align:center; background:var(--bg2); border:2px solid var(--border); border-radius:12px; padding:1rem 1.5rem; width:100%; }
+.captain-bid-status.leading { border-color:var(--success); }
+.captain-bid-status.trailing { border-color:var(--border); }
+.bid-leader-tag       { font-size:0.85rem; margin-top:0.3rem; color:var(--text-dim); }
+.bid-leader-tag.you   { color:var(--success); font-weight:700; }
+.captain-note         { font-size:0.85rem; color:var(--text-dim); text-align:center; background:var(--bg3); padding:0.6rem 1rem; border-radius:8px; }
+.waiting-spin         { text-align:center; padding:2rem; }
+.spin-anim            { font-size:4rem; animation:spin 2s linear infinite; }
+@keyframes spin       { to { transform:rotate(360deg); } }
+.captain-squad-grid   { display:grid; grid-template-columns:repeat(3,1fr); gap:0.6rem; width:100%; }
+.squad-mini           { display:flex; flex-direction:column; align-items:center; gap:0.25rem; background:var(--bg3); border-radius:8px; padding:0.5rem; }
+.squad-thumb          { width:40px; height:40px; border-radius:50%; background:var(--bg2); overflow:hidden; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:1.2rem; color:var(--text-dim); }
+.squad-thumb img      { width:100%; height:100%; object-fit:cover; }
+.squad-name           { font-size:0.75rem; text-align:center; font-weight:600; }
+.squad-price          { font-size:0.7rem; color:var(--gold); }
+
+/* ── Scrollbar ────────────────────────────────────────────────────── */
+::-webkit-scrollbar       { width:4px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+/* ── Loading ──────────────────────────────────────────────────────── */
+.loading-text { font-family:'Bebas Neue',sans-serif; font-size:2rem; color:var(--text-dim); letter-spacing:2px; }
+.center-all   { display:flex; align-items:center; justify-content:center; }
