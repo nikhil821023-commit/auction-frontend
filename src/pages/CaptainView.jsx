@@ -3,27 +3,51 @@ import { useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuctionStore } from '../store/auctionStore'
 import { useWebSocket } from '../hooks/useWebSocket'
-import { getDashboard } from '../api/auctionApi'
+import { getDashboard, getBidMode } from '../api/auctionApi'
 import PlayerCard from '../components/PlayerCard'
-import TimerRing  from '../components/TimerRing'
+import TimerRing from '../components/TimerRing'
+import SelfBidPanel from '../components/SelfBidPanel'
 
 export default function CaptainView() {
-  const { tid }   = useParams()
-  const { team, auctionState, timerState, spinResult, dashboard,
-          setAuctionState, setTimerState, setSpinResult, setDashboard } = useAuctionStore()
+  const { tid } = useParams()
+
+  const {
+    team,
+    auctionState,
+    timerState,
+    spinResult,
+    dashboard,
+    setAuctionState,
+    setTimerState,
+    setSpinResult,
+    setDashboard
+  } = useAuctionStore()
+
   const [myTeamCard, setMyTeamCard] = useState(null)
+
+  // ✅ Bid Mode
+  const [bidMode, setBidModeState] = useState('ORGANIZER_CONTROLLED')
 
   useWebSocket(useCallback((client) => {
     client.subscribe(`/topic/auction/${tid}`, (msg) => {
-      setAuctionState(JSON.parse(msg.body))
+      const data = JSON.parse(msg.body)
+      setAuctionState(data)
+
+      // ✅ Listen for mode changes
+      if (data.event === 'BID_MODE_CHANGED') {
+        setBidModeState(data.bidMode)
+      }
     })
+
     client.subscribe(`/topic/auction/${tid}/timer`, (msg) => {
       setTimerState(JSON.parse(msg.body))
     })
+
     client.subscribe(`/topic/auction/${tid}/spin`, (msg) => {
       const d = JSON.parse(msg.body)
       if (d.event === 'PLAYER_REVEALED') setSpinResult(d.player)
     })
+
     client.subscribe(`/topic/dashboard/${tid}`, (msg) => {
       setDashboard(JSON.parse(msg.body))
     })
@@ -31,6 +55,9 @@ export default function CaptainView() {
 
   useEffect(() => {
     getDashboard(tid).then(r => setDashboard(r.data)).catch(() => {})
+
+    // ✅ Get bid mode after dashboard load attempt
+    getBidMode(tid).then(r => setBidModeState(r.data.bidMode)).catch(() => {})
   }, [tid])
 
   useEffect(() => {
@@ -46,12 +73,20 @@ export default function CaptainView() {
     <div className="captain-auction-bg">
 
       {/* My team header */}
-      <div className="captain-header"
-        style={{ borderColor: team?.teamColor }}>
-        <div className="captain-team-name"
-          style={{ color: team?.teamColor }}>{team?.teamName}</div>
+      <div
+        className="captain-header"
+        style={{ borderColor: team?.teamColor }}
+      >
+        <div
+          className="captain-team-name"
+          style={{ color: team?.teamColor }}
+        >
+          {team?.teamName}
+        </div>
         <div className="captain-budget-row">
-          <span>Budget: ₹{myTeamCard?.remainingBudget?.toLocaleString() || team?.totalBudget}</span>
+          <span>
+            Budget: ₹{myTeamCard?.remainingBudget?.toLocaleString() || team?.totalBudget}
+          </span>
           <span>Players: {myTeamCard?.playerCount || 0}</span>
         </div>
       </div>
@@ -61,8 +96,11 @@ export default function CaptainView() {
         {/* Current player on block */}
         <div className="captain-left">
           {spinResult ? (
-            <PlayerCard player={spinResult}
-              currentBid={auctionState?.currentBid} compact />
+            <PlayerCard
+              player={spinResult}
+              currentBid={auctionState?.currentBid}
+              compact
+            />
           ) : (
             <div className="waiting-spin">
               <div className="spin-anim">🎰</div>
@@ -73,34 +111,60 @@ export default function CaptainView() {
 
         {/* Timer + bid status */}
         <div className="captain-center">
+
           <TimerRing
-            remaining={timerState?.remainingSeconds || 0}
-            total={timerState?.totalSeconds || 30}
-            isPaused={timerState?.isPaused}
+            remaining={timerState?.remainingSeconds ?? 0}
+            total={timerState?.totalSeconds ?? 30}
+            isPaused={timerState?.isPaused ?? false}
           />
 
+          {/* Current bid display */}
           <AnimatePresence>
-            {auctionState?.currentBid && (
+            {auctionState?.currentBid != null && (
               <motion.div
                 className={`captain-bid-status ${isLeading ? 'leading' : 'trailing'}`}
                 key={auctionState.currentBid}
-                initial={{ scale:1.2, opacity:0 }}
-                animate={{ scale:1, opacity:1 }}>
+                initial={{ scale: 1.2, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+              >
                 <div className="bid-amount">
-                  ₹{auctionState.currentBid?.toLocaleString()}
+                  ₹{Number(auctionState.currentBid).toLocaleString()}
                 </div>
                 <div className={`bid-leader-tag ${isLeading ? 'you' : ''}`}>
                   {isLeading
-                    ? '🏆 YOU are leading!'
+                    ? '🏆 YOU ARE LEADING!'
                     : `${auctionState.highBidderCaptainName} is leading`}
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {auctionState?.phase === 'BIDDING' && (
-            <div className="captain-note">
-              📢 Tell the organizer your bid amount
+          {/* Mode 2: Captain self-bid panel */}
+          {bidMode === 'CAPTAIN_SELF' ? (
+            <SelfBidPanel
+              tournamentId={Number(tid)}
+              team={team}
+              currentBid={auctionState?.currentBid ?? 0}
+              basePrice={spinResult?.basePrice ?? 0}
+              phase={auctionState?.phase}   // keep phase source consistent with server state
+              bidIncrement={50}
+              isHighBidder={isLeading}
+            />
+          ) : (
+            /* Mode 1: Captain just watches */
+            <div className="captain-watch-mode">
+              <div className="cwm-icon">🎙️</div>
+              <p className="cwm-text">Organizer-controlled bidding</p>
+              <p className="cwm-sub">Shout your bid amount to the organizer</p>
+              {auctionState?.phase === 'BIDDING' && (
+                <motion.div
+                  className="cwm-shout-hint"
+                  animate={{ scale: [1, 1.04, 1] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                >
+                  📢 Shout your bid!
+                </motion.div>
+              )}
             </div>
           )}
         </div>

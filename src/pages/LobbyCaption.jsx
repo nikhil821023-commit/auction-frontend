@@ -4,22 +4,23 @@ import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { useAuctionStore } from '../store/auctionStore'
 import { useWebSocket } from '../hooks/useWebSocket'
+import { getLobbyStatus } from '../api/lobbyApi'  // ← ADD THIS IMPORT
 
 export default function LobbyCaption() {
-  const { tid }     = useParams()
-  const navigate    = useNavigate()
-  const { team }    = useAuctionStore()
-  const [lobby, setLobby]   = useState(null)
+  const { tid }   = useParams()
+  const navigate  = useNavigate()
+  const { team }  = useAuctionStore()
+  const [lobby, setLobby]     = useState(null)
   const [isReady, setIsReady] = useState(false)
 
-  const { sendMessage } = useWebSocket(useCallback((client) => {
-    // Join lobby
-    client.send('/app/lobby/join', {}, JSON.stringify({
-      joinCode: team?.tournament?.joinCode,
-      teamId: team?.id,
-      captainName: team?.captainName
-    }))
+  // ── Poll initial lobby state via REST (don't rely solely on WS) ──
+  useEffect(() => {
+    getLobbyStatus(tid).then(r => setLobby(r.data)).catch(() => {})
+  }, [tid])
 
+  const { sendMessage } = useWebSocket(useCallback((client) => {
+
+    // Subscribe FIRST, then join
     client.subscribe(`/topic/lobby/${tid}`, (msg) => {
       setLobby(JSON.parse(msg.body))
     })
@@ -28,12 +29,27 @@ export default function LobbyCaption() {
       toast.success('🚀 Auction is starting!')
       navigate(`/captain/auction/${tid}`)
     })
+
+    // FIX: send tournamentId + teamId directly, don't rely on nested joinCode
+    client.publish({
+      destination: '/app/lobby/join',
+      body: JSON.stringify({
+        joinCode:    team?.joinCode || team?.tournament?.joinCode || '',
+        teamId:      team?.id,
+        captainName: team?.captainName,
+        tournamentId: Number(tid)   // ← send this as backup
+      })
+    })
+
   }, [tid, team]))
 
   const toggleReady = () => {
     const next = !isReady
     setIsReady(next)
-    sendMessage('/app/lobby/ready', { tournamentId: Number(tid), ready: next })
+    sendMessage('/app/lobby/ready', {
+      tournamentId: Number(tid),
+      ready: next
+    })
   }
 
   return (
@@ -45,7 +61,9 @@ export default function LobbyCaption() {
           style={{ borderColor: team?.teamColor || '#e63946' }}>
           <h2 style={{ color: team?.teamColor }}>{team?.teamName}</h2>
           <p>Captain: {team?.captainName}</p>
-          <p className="budget-display">Budget: ₹{team?.totalBudget?.toLocaleString()}</p>
+          <p className="budget-display">
+            Budget: ₹{team?.totalBudget?.toLocaleString()}
+          </p>
         </div>
 
         <div className="lobby-stats">
@@ -66,7 +84,8 @@ export default function LobbyCaption() {
         <div className="captain-list">
           {lobby?.connectedCaptains?.map(c => (
             <div key={c.sessionId} className="captain-row">
-              <div className="captain-color-dot" style={{ background: c.teamColor }} />
+              <div className="captain-color-dot"
+                style={{ background: c.teamColor }} />
               <div className="captain-info">
                 <span>{c.captainName}</span>
                 <span className="captain-team">{c.teamName}</span>
@@ -82,7 +101,7 @@ export default function LobbyCaption() {
           className={`btn-ready ${isReady ? 'ready-active' : ''}`}
           onClick={toggleReady}
           whileTap={{ scale: 0.96 }}>
-          {isReady ? '✅ I\'m Ready!' : '👋 Mark as Ready'}
+          {isReady ? "✅ I'm Ready!" : '👋 Mark as Ready'}
         </motion.button>
 
         <p className="lobby-waiting-text">

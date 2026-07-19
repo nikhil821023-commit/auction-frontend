@@ -2,16 +2,12 @@ import { useEffect, useRef, useCallback } from 'react'
 import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
 
-/**
- * STOMP WebSocket hook.
- * Returns { sendMessage, subscribe, disconnect }
- */
 export function useWebSocket(onConnected) {
   const clientRef = useRef(null)
 
   useEffect(() => {
     const client = new Client({
-      webSocketFactory: () => new SockJS('/ws'),
+      webSocketFactory: () => new SockJS('http://localhost:8080/ws'), // ← FIXED URL
       reconnectDelay: 3000,
       onConnect: () => {
         console.log('✅ WebSocket connected')
@@ -25,7 +21,7 @@ export function useWebSocket(onConnected) {
     clientRef.current = client
 
     return () => client.deactivate()
-  }, [])
+  }, []) // intentionally empty — only connect once
 
   const subscribe = useCallback((topic, callback) => {
     if (!clientRef.current?.connected) return

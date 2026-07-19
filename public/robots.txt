@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Block internal app routes from indexing
+Disallow: /organizer/auction/
+Disallow: /captain/auction/
+Disallow: /captain/lobby/
+Disallow: /organizer/lobby/
+
+Sitemap: https://www.auctionx.live/sitemap.xml
