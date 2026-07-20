@@ -1,17 +1,25 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
   define: {
-    global: 'window',
+    global: "window",
   },
   server: {
     port: 3000,
     proxy: {
-      
-      '/api': 'http://localhost:8080',
-      '/ws':  { target: 'http://localhost:8080', ws: true }
-    }
-  }
-})
+      "/api": {
+        target: "https://auctionx-1-z913.onrender.com",
+        changeOrigin: true,
+        secure: true,
+      },
+      "/ws": {
+        target: "https://auctionx-1-z913.onrender.com",
+        ws: true,
+        changeOrigin: true,
+        secure: true,
+      },
+    },
+  },
+});

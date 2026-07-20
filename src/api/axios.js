@@ -1,41 +1,46 @@
-import axios from 'axios'
+import axios from "axios";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 const api = axios.create({
-  baseURL: '/api',
-  headers: { 'Content-Type': 'application/json' }
-})
+  baseURL: `${API_BASE_URL}/api`,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 // ✅ Attach JWT token to every request automatically
-api.interceptors.request.use(config => {
-  const token = localStorage.getItem('ax_token')
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("ax_token");
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+    config.headers.Authorization = `Bearer ${token}`;
   }
-  return config
-})
+  return config;
+});
 
 // ✅ Auto logout on 401
 api.interceptors.response.use(
-  res => res,
-  err => {
+  (res) => res,
+  (err) => {
     if (err.response?.status === 401) {
-      localStorage.removeItem('ax_token')
-      localStorage.removeItem('ax_user')
-      window.location.href = '/auth'
+      localStorage.removeItem("ax_token");
+      localStorage.removeItem("ax_user");
+      window.location.href = "/auth";
     }
-    return Promise.reject(err)
+    return Promise.reject(err);
   }
-)
+);
 
-export const multipartApi = axios.create({ baseURL: '/api' })
+export const multipartApi = axios.create({
+  baseURL: `${API_BASE_URL}/api`,
+});
 
-// Same interceptor for multipart
-multipartApi.interceptors.request.use(config => {
-  const token = localStorage.getItem('ax_token')
+multipartApi.interceptors.request.use((config) => {
+  const token = localStorage.getItem("ax_token");
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+    config.headers.Authorization = `Bearer ${token}`;
   }
-  return config
-})
+  return config;
+});
 
-export default api
+export default api;
