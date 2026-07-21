@@ -2,12 +2,14 @@ import { useEffect, useRef, useCallback } from 'react'
 import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
+
 export function useWebSocket(onConnected) {
   const clientRef = useRef(null)
 
   useEffect(() => {
     const client = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8080/ws'), // ← FIXED URL
+      webSocketFactory: () => new SockJS(`${API_BASE_URL}/ws`),
       reconnectDelay: 3000,
       onConnect: () => {
         console.log('✅ WebSocket connected')
