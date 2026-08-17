@@ -1,33 +1,49 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
-export const useAuctionStore = create((set) => ({
-  // Tournament & team context
-  tournament:   null,
-  team:         null,
-  role:         null,   // 'ORGANIZER' | 'CAPTAIN'
+export const useAuctionStore = create(
+  persist(
+    (set) => ({
+      // Tournament & team context
+      tournament:   null,
+      team:         null,
+      role:         null,   // 'ORGANIZER' | 'CAPTAIN'
 
-  // Auction engine state (from WS)
-  auctionState: null,
-  timerState:   null,
-  spinResult:   null,
-  dashboard:    null,
+      // Auction engine state (from WS)
+      auctionState: null,
+      timerState:   null,
+      spinResult:   null,
+      dashboard:    null,
 
-  // Lobby state
-  lobbyStatus:  null,
-  settings:     null,
+      // Lobby state
+      lobbyStatus:  null,
+      settings:     null,
 
-  // Actions
-  setTournament:   (t)  => set({ tournament: t }),
-  setTeam:         (t)  => set({ team: t }),
-  setRole:         (r)  => set({ role: r }),
-  setAuctionState: (s)  => set({ auctionState: s }),
-  setTimerState:   (s)  => set({ timerState: s }),
-  setSpinResult:   (s)  => set({ spinResult: s }),
-  setDashboard:    (d)  => set({ dashboard: d }),
-  setLobbyStatus:  (l)  => set({ lobbyStatus: l }),
-  setSettings:     (s)  => set({ settings: s }),
-  reset:           ()   => set({
-    auctionState: null, timerState: null,
-    spinResult: null,   dashboard: null
-  })
-}))
+      // Actions
+      setTournament:   (t)  => set({ tournament: t }),
+      setTeam:         (t)  => set({ team: t }),
+      setRole:         (r)  => set({ role: r }),
+      setAuctionState: (s)  => set({ auctionState: s }),
+      setTimerState:   (s)  => set({ timerState: s }),
+      setSpinResult:   (s)  => set({ spinResult: s }),
+      setDashboard:    (d)  => set({ dashboard: d }),
+      setLobbyStatus:  (l)  => set({ lobbyStatus: l }),
+      setSettings:     (s)  => set({ settings: s }),
+      reset:           ()   => set({
+        auctionState: null, timerState: null,
+        spinResult: null,   dashboard: null
+      }),
+      clearIdentity: () => set({
+  tournament: null, team: null, role: null
+})
+    }),
+    {
+      name: 'auctionx-store', // localStorage key
+      partialize: (state) => ({
+        tournament: state.tournament,
+        team:       state.team,
+        role:       state.role,
+      }), // only persist identity/context — never live auction data
+    }
+  )
+)
