@@ -1,5 +1,5 @@
 // ✅ Single source of truth for backend image URLs
-const BACKEND = 'http://localhost:8080'
+const BACKEND = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
 export function playerImageUrl(photoPath) {
   if (!photoPath) return null
