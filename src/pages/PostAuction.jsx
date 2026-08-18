@@ -380,8 +380,8 @@ function handleShareSquad(squad) {
     `👤 Captain: ${squad.captainName}\n` +
     `👥 Players: ${squad.playerCount}\n` +
     `💰 Spent: ₹${Number(squad.spentBudget).toLocaleString()}\n` +
-    squad.players?.slice(0, 5)
-      .map(p => `  • ${p.name} (${p.role}) — ₹${p.soldPrice}`)
+    squad.players
+      ?.map(p => `  • ${p.name} (${p.role}) — ₹${p.soldPrice}`)
       .join('\n')
 
   if (navigator.share) {
