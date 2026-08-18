@@ -55,7 +55,7 @@ export default function CaptainView() {
     })
   }, [tid]))
 
-
+  
   useEffect(() => {
     if (!team && tid) {
       setTeamLoading(true)
