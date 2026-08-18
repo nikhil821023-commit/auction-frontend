@@ -54,9 +54,7 @@ export default function CaptainView() {
       setDashboard(JSON.parse(msg.body))
     })
   }, [tid]))
-
-  
-  useEffect(() => {
+ useEffect(() => {
     if (!team && tid) {
       setTeamLoading(true)
       setTeamError('')
