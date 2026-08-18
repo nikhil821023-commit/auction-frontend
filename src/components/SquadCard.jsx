@@ -212,6 +212,7 @@ export default function SquadCard({ squad, highlight = false, onShare }) {
           padding: 12px;
           max-height: none;
           overflow: visible;
+          perspective: 800px;
         }
 
         .sc-player-tile {
@@ -224,6 +225,22 @@ export default function SquadCard({ squad, highlight = false, onShare }) {
           border: 1px solid rgba(255,255,255,0.08);
           border-radius: 10px;
           padding: 10px 6px 8px;
+          overflow: hidden;
+          transform-style: preserve-3d;
+        }
+
+        .sc-tile-glow {
+          position: absolute;
+          inset: 0;
+          border-radius: 10px;
+          pointer-events: none;
+        }
+
+        .sc-tile-name-mask {
+          display: block;
+          overflow: hidden;
+          max-width: 100%;
+          line-height: 1.2;
         }
 
         .sc-tile-tier {
@@ -259,6 +276,7 @@ export default function SquadCard({ squad, highlight = false, onShare }) {
         }
 
         .sc-tile-name {
+          display: block;
           font-size: 12px;
           font-weight: 600;
           line-height: 1.2;
@@ -401,39 +419,80 @@ function PlayerTile({ player, index }) {
   const src = playerImageUrl(player.photo)
   const tc  = tierColors[player.tier] || '#888'
 
+  const stagger = index * 0.09
+
   return (
     <motion.div className="sc-player-tile"
       style={{ '--tier-color': tc }}
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: index * 0.02 }}>
+      initial={{ opacity: 0, y: 24, scale: 0.75, rotateX: -25 }}
+      animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+      transition={{
+        delay: stagger,
+        type: 'spring',
+        stiffness: 260,
+        damping: 18
+      }}>
+
+      {/* Glow flash sweeping in on reveal */}
+      <motion.span className="sc-tile-glow"
+        style={{ background: `radial-gradient(circle, ${tc}55 0%, transparent 70%)` }}
+        initial={{ opacity: 0.9, scale: 0.4 }}
+        animate={{ opacity: 0, scale: 1.6 }}
+        transition={{ delay: stagger, duration: 0.6, ease: 'easeOut' }} />
 
       {/* Tier badge, top corner */}
-      <span className="sc-tile-tier" style={{ color: tc, borderColor: tc + '55' }}>
+      <motion.span className="sc-tile-tier"
+        style={{ color: tc, borderColor: tc + '55' }}
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: stagger + 0.25, type: 'spring', stiffness: 400 }}>
         {player.tier}
-      </span>
+      </motion.span>
 
       {/* Photo */}
-      <div className="sc-tile-photo" style={{ borderColor: tc }}>
+      <motion.div className="sc-tile-photo"
+        style={{ borderColor: tc }}
+        initial={{ scale: 0, rotate: -90 }}
+        animate={{ scale: 1, rotate: 0 }}
+        transition={{ delay: stagger + 0.1, type: 'spring', stiffness: 300, damping: 15 }}>
         {src && !imgErr ? (
           <img src={src} alt={player.name}
             onError={() => setImgErr(true)} />
         ) : (
           <span>{player.name?.charAt(0)}</span>
         )}
-      </div>
+      </motion.div>
 
-      {/* Name + role */}
-      <span className="sc-tile-name">{player.name}</span>
-      <span className="sc-tile-role">{player.role}</span>
+      {/* Name — presentation-style reveal, slides up under a clipping mask */}
+      <span className="sc-tile-name-mask">
+        <motion.span className="sc-tile-name"
+          initial={{ y: '110%' }}
+          animate={{ y: '0%' }}
+          transition={{ delay: stagger + 0.2, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
+          {player.name}
+        </motion.span>
+      </span>
+
+      <motion.span className="sc-tile-role"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: stagger + 0.3, duration: 0.3 }}>
+        {player.role}
+      </motion.span>
 
       {/* Price */}
-      <span className="sc-tile-price">
+      <motion.span className="sc-tile-price"
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: stagger + 0.35, duration: 0.3 }}>
         ₹{Number(player.soldPrice || 0).toLocaleString()}
-      </span>
-      <span className="sc-tile-base-price">
+      </motion.span>
+      <motion.span className="sc-tile-base-price"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: stagger + 0.4, duration: 0.3 }}>
         base ₹{Number(player.basePrice || 0).toLocaleString()}
-      </span>
+      </motion.span>
     </motion.div>
   )
 }
