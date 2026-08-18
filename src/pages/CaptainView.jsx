@@ -1,16 +1,16 @@
 import { useEffect, useCallback, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuctionStore } from '../store/auctionStore'
 import { useWebSocket } from '../hooks/useWebSocket'
-import { getDashboard, getBidMode } from '../api/auctionApi'
-import { getMyTeam } from '../api/teamApi'
+import { getDashboard, getBidMode, verifyTeamAccess } from '../api/auctionApi'
 import PlayerCard from '../components/PlayerCard'
 import TimerRing from '../components/TimerRing'
 import SelfBidPanel from '../components/SelfBidPanel'
 
 export default function CaptainView() {
   const { tid } = useParams()
+  const navigate = useNavigate()
 
   const {
     team,
@@ -18,24 +18,28 @@ export default function CaptainView() {
     timerState,
     spinResult,
     dashboard,
-    setTeam,
     setAuctionState,
     setTimerState,
     setSpinResult,
-    setDashboard
+    setDashboard,
+    clearIdentity
   } = useAuctionStore()
 
   const [myTeamCard, setMyTeamCard] = useState(null)
-  const [teamLoading, setTeamLoading] = useState(false)
-  const [teamError, setTeamError] = useState('')
 
+  // ✅ Bid Mode
   const [bidMode, setBidModeState] = useState('ORGANIZER_CONTROLLED')
+
+  // ✅ Guards against stale/mismatched identity (e.g. bookmarked URL,
+  // shared link, or leftover session data from a different team/tournament)
+  const [identityChecked, setIdentityChecked] = useState(false)
 
   useWebSocket(useCallback((client) => {
     client.subscribe(`/topic/auction/${tid}`, (msg) => {
       const data = JSON.parse(msg.body)
       setAuctionState(data)
 
+      // ✅ Listen for mode changes
       if (data.event === 'BID_MODE_CHANGED') {
         setBidModeState(data.bidMode)
       }
@@ -55,26 +59,36 @@ export default function CaptainView() {
     })
   }, [tid]))
 
-  // Restore team if missing (fresh tab, cleared storage, direct link, repeated refresh)
+  // ✅ Validate that the captain identity in this tab's session actually
+  // belongs to this tournament/team before rendering anything sensitive.
+  // With sessionStorage this mostly guards against stale/bookmarked state;
+  // it's a cheap extra safety net on top of the storage fix.
   useEffect(() => {
-    if (!team && tid) {
-      setTeamLoading(true)
-      setTeamError('')
-      getMyTeam(tid)
-        .then(res => {
-          setTeam(res.data)
-        })
-        .catch(err => {
-          const msg = err.response?.data?.error || err.message || 'Could not load your team'
-          setTeamError(msg)
-          console.error('Could not restore team:', msg)
-        })
-        .finally(() => setTeamLoading(false))
+    let cancelled = false
+
+    if (!team?.id) {
+      setIdentityChecked(true) // nothing to validate, let normal "no team" UI handle it
+      return
     }
-  }, [tid, team, setTeam])
+
+    verifyTeamAccess(tid, team.id)
+      .then(() => {
+        if (!cancelled) setIdentityChecked(true)
+      })
+      .catch(() => {
+        if (!cancelled) {
+          clearIdentity()
+          navigate(`/auction/${tid}/join`, { replace: true })
+        }
+      })
+
+    return () => { cancelled = true }
+  }, [tid, team?.id])
 
   useEffect(() => {
     getDashboard(tid).then(r => setDashboard(r.data)).catch(() => {})
+
+    // ✅ Get bid mode after dashboard load attempt
     getBidMode(tid).then(r => setBidModeState(r.data.bidMode)).catch(() => {})
   }, [tid])
 
@@ -87,22 +101,13 @@ export default function CaptainView() {
 
   const isLeading = auctionState?.highBidderTeamId === team?.id
 
-  if (teamLoading) {
+  // ✅ Avoid flashing another team's stale data while identity is verified
+  if (!identityChecked) {
     return (
       <div className="captain-auction-bg">
-        <div style={{ padding: '2rem', textAlign: 'center' }}>
+        <div className="waiting-spin">
+          <div className="spin-anim">🎰</div>
           <p>Loading your team...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (teamError && !team) {
-    return (
-      <div className="captain-auction-bg">
-        <div style={{ padding: '2rem', textAlign: 'center' }}>
-          <p>⚠️ {teamError}</p>
-          <p>Please rejoin the tournament from your lobby link.</p>
         </div>
       </div>
     )
@@ -157,6 +162,7 @@ export default function CaptainView() {
             isPaused={timerState?.isPaused ?? false}
           />
 
+          {/* Current bid display */}
           <AnimatePresence>
             {auctionState?.currentBid != null && (
               <motion.div
@@ -177,17 +183,19 @@ export default function CaptainView() {
             )}
           </AnimatePresence>
 
+          {/* Mode 2: Captain self-bid panel */}
           {bidMode === 'CAPTAIN_SELF' ? (
             <SelfBidPanel
               tournamentId={Number(tid)}
               team={team}
               currentBid={auctionState?.currentBid ?? 0}
               basePrice={spinResult?.basePrice ?? 0}
-              phase={auctionState?.phase}
+              phase={auctionState?.phase}   // keep phase source consistent with server state
               bidIncrement={50}
               isHighBidder={isLeading}
             />
           ) : (
+            /* Mode 1: Captain just watches */
             <div className="captain-watch-mode">
               <div className="cwm-icon">🎙️</div>
               <p className="cwm-text">Organizer-controlled bidding</p>
