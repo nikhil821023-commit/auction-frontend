@@ -55,7 +55,7 @@ export default function CaptainView() {
     })
   }, [tid]))
 
-  // Restore team if missing (fresh tab, cleared storage, direct link, repeated refresh)
+
   useEffect(() => {
     if (!team && tid) {
       setTeamLoading(true)
