@@ -7,6 +7,7 @@ import { getDashboard, getBidMode } from '../api/auctionApi'
 import PlayerCard from '../components/PlayerCard'
 import TimerRing from '../components/TimerRing'
 import SelfBidPanel from '../components/SelfBidPanel'
+import { playerImageUrl } from '../utils/imageUrl'
 
 export default function CaptainView() {
   const { tid } = useParams()
