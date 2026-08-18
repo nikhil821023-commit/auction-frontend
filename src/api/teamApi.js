@@ -11,3 +11,4 @@ export const registerTeam = (data, logo) => {
 // ✅ FIX: embed tournamentId directly in URL — avoids axios params issue with some backends
 export const getTeams = (tournamentId) => api.get(`/teams?tournamentId=${Number(tournamentId)}`)
 export const getTeam  = (id)           => api.get(`/teams/${id}`)
+export const getMyTeam = (tournamentId) => api.get(`/teams/my-team?tournamentId=${tournamentId}`)
