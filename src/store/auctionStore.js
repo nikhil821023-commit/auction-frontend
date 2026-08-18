@@ -1,5 +1,6 @@
+
 import { create } from 'zustand'
-import { persist, createJSONStorage } from 'zustand/middleware'
+import { persist } from 'zustand/middleware'
 
 export const useAuctionStore = create(
   persist(
@@ -34,16 +35,11 @@ export const useAuctionStore = create(
         spinResult: null,   dashboard: null
       }),
       clearIdentity: () => set({
-        tournament: null, team: null, role: null
-      })
+  tournament: null, team: null, role: null
+})
     }),
     {
-      name: 'auctionx-store', // sessionStorage key (per-tab, not shared across tabs)
-
-      // ✅ Fix: use sessionStorage instead of the default localStorage.
-    
-      storage: createJSONStorage(() => sessionStorage),
-
+      name: 'auctionx-store', // localStorage key
       partialize: (state) => ({
         tournament: state.tournament,
         team:       state.team,
