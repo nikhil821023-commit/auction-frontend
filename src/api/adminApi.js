@@ -6,4 +6,4 @@ export const getAnalytics   = ()  => api.get(`/admin/analytics?key=${KEY}`)
 export const getAdminFeedback=()  => api.get(`/admin/feedback?key=${KEY}`)
 export const getTournaments  = ()  => api.get(`/admin/tournaments?key=${KEY}`)
 export const trackVisit = (data)  => api.post('/admin/track', data)
-export const getMyTeam = (tournamentId) => api.get(`/teams/my-team?tournamentId=${tournamentId}`)
+
