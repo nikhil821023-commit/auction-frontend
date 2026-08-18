@@ -31,6 +31,272 @@ export default function SquadCard({ squad, highlight = false, onShare }) {
     <div className={`squad-card ${highlight ? 'highlighted' : ''}`}
       style={{ '--tc': squad.teamColor || '#e63946' }}>
 
+      {/* All CSS lives here so the component is fully self-contained */}
+      <style>{`
+        .squad-card {
+          background: #12141c;
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 14px;
+          overflow: hidden;
+          color: #e5e7eb;
+          font-family: inherit;
+        }
+
+        .squad-card.highlighted {
+          border-color: #e5c100;
+          box-shadow: 0 0 0 1px rgba(229,193,0,0.4), 0 0 24px rgba(229,193,0,0.15);
+        }
+
+        .sc-header {
+          padding: 16px;
+        }
+
+        .sc-team-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 12px;
+        }
+
+        .sc-color-swatch {
+          width: 10px;
+          height: 34px;
+          border-radius: 3px;
+          flex-shrink: 0;
+        }
+
+        .sc-team-info {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+        }
+
+        .sc-team-name {
+          font-size: 18px;
+          font-weight: 800;
+          margin: 0;
+          letter-spacing: 0.3px;
+        }
+
+        .sc-captain {
+          font-size: 12px;
+          color: #94a3b8;
+        }
+
+        .sc-champion-badge {
+          background: rgba(229,193,0,0.15);
+          color: #e5c100;
+          border: 1px solid rgba(229,193,0,0.4);
+          font-size: 11px;
+          font-weight: 700;
+          padding: 4px 10px;
+          border-radius: 999px;
+          white-space: nowrap;
+        }
+
+        .sc-budget-info {
+          margin-bottom: 12px;
+        }
+
+        .sc-budget-row {
+          display: flex;
+          justify-content: space-between;
+          font-size: 13px;
+          margin-bottom: 6px;
+          color: #e5e7eb;
+        }
+
+        .sc-budget-remaining {
+          color: #22c55e;
+          font-weight: 600;
+        }
+
+        .sc-bar-bg {
+          width: 100%;
+          height: 8px;
+          background: rgba(255,255,255,0.08);
+          border-radius: 999px;
+          overflow: hidden;
+        }
+
+        .sc-bar-fill {
+          height: 100%;
+          border-radius: 999px;
+        }
+
+        .sc-bar-labels {
+          display: flex;
+          justify-content: space-between;
+          font-size: 11px;
+          color: #94a3b8;
+          margin-top: 4px;
+        }
+
+        .sc-tier-chips {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-bottom: 14px;
+        }
+
+        .sc-tier-chip {
+          font-size: 11px;
+          font-weight: 700;
+          padding: 3px 9px;
+          border-radius: 6px;
+        }
+
+        .sc-actions {
+          display: flex;
+          gap: 8px;
+        }
+
+        .sc-expand-btn,
+        .sc-share-btn {
+          flex: 1;
+          padding: 9px 12px;
+          border-radius: 8px;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          border: 1px solid rgba(255,255,255,0.12);
+          background: rgba(255,255,255,0.04);
+          color: #e5e7eb;
+          transition: background 0.15s ease;
+        }
+
+        .sc-expand-btn:hover,
+        .sc-share-btn:hover {
+          background: rgba(255,255,255,0.08);
+        }
+
+        .sc-share-btn {
+          flex: 0 0 auto;
+        }
+
+        .sc-players-section {
+          border-top: 1px solid rgba(255,255,255,0.08);
+          overflow: hidden;
+        }
+
+        .sc-role-filters {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          padding: 12px 12px 0;
+        }
+
+        .sc-role-btn {
+          font-size: 11px;
+          font-weight: 600;
+          padding: 5px 10px;
+          border-radius: 999px;
+          border: 1px solid rgba(255,255,255,0.12);
+          background: transparent;
+          color: #94a3b8;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+
+        .sc-role-btn.active {
+          background: var(--tc, #e63946);
+          border-color: var(--tc, #e63946);
+          color: #fff;
+        }
+
+        /* Player grid — ALL players visible at once, no scroll */
+        .sc-player-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+          gap: 10px;
+          padding: 12px;
+          max-height: none;
+          overflow: visible;
+        }
+
+        .sc-player-tile {
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 10px;
+          padding: 10px 6px 8px;
+        }
+
+        .sc-tile-tier {
+          position: absolute;
+          top: 4px;
+          right: 4px;
+          font-size: 9px;
+          font-weight: 700;
+          padding: 1px 5px;
+          border: 1px solid;
+          border-radius: 4px;
+        }
+
+        .sc-tile-photo {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          border: 2px solid;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 6px;
+          background: rgba(255,255,255,0.05);
+          font-weight: 700;
+          font-size: 16px;
+        }
+
+        .sc-tile-photo img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .sc-tile-name {
+          font-size: 12px;
+          font-weight: 600;
+          line-height: 1.2;
+          max-width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .sc-tile-role {
+          font-size: 10px;
+          color: #94a3b8;
+          margin-bottom: 4px;
+        }
+
+        .sc-tile-price {
+          font-size: 11px;
+          font-weight: 700;
+          color: #22c55e;
+        }
+
+        .sc-tile-base-price {
+          font-size: 9px;
+          color: #64748b;
+        }
+
+        @media (max-width: 480px) {
+          .sc-player-grid {
+            grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+            gap: 8px;
+          }
+          .sc-tile-photo {
+            width: 38px;
+            height: 38px;
+          }
+        }
+      `}</style>
+
       {/* ── Card header ─────────────────────────────────── */}
       <div className="sc-header"
         style={{ borderBottom: `3px solid ${squad.teamColor}` }}>
@@ -95,7 +361,7 @@ export default function SquadCard({ squad, highlight = false, onShare }) {
         </div>
       </div>
 
-      {/* ── Expanded player list ─────────────────────────── */}
+      {/* ── Expanded player grid ─────────────────────────── */}
       <AnimatePresence>
         {expanded && (
           <motion.div className="sc-players-section"
@@ -117,10 +383,10 @@ export default function SquadCard({ squad, highlight = false, onShare }) {
               </div>
             )}
 
-            {/* Player list */}
-            <div className="sc-player-list">
+            {/* Player grid — all players visible at once, no scrolling */}
+            <div className="sc-player-grid">
               {sorted?.map((p, i) => (
-                <PlayerRow key={p.id || i} player={p} index={i} />
+                <PlayerTile key={p.id || i} player={p} index={i} />
               ))}
             </div>
           </motion.div>
@@ -130,20 +396,25 @@ export default function SquadCard({ squad, highlight = false, onShare }) {
   )
 }
 
-function PlayerRow({ player, index }) {
+function PlayerTile({ player, index }) {
   const [imgErr, setImgErr] = useState(false)
   const src = playerImageUrl(player.photo)
   const tc  = tierColors[player.tier] || '#888'
 
   return (
-    <motion.div className="sc-player-row"
-      initial={{ opacity: 0, x: -12 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: index * 0.03 }}>
+    <motion.div className="sc-player-tile"
+      style={{ '--tier-color': tc }}
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: index * 0.02 }}>
+
+      {/* Tier badge, top corner */}
+      <span className="sc-tile-tier" style={{ color: tc, borderColor: tc + '55' }}>
+        {player.tier}
+      </span>
 
       {/* Photo */}
-      <div className="sc-player-photo"
-        style={{ borderColor: tc }}>
+      <div className="sc-tile-photo" style={{ borderColor: tc }}>
         {src && !imgErr ? (
           <img src={src} alt={player.name}
             onError={() => setImgErr(true)} />
@@ -152,28 +423,17 @@ function PlayerRow({ player, index }) {
         )}
       </div>
 
-      {/* Info */}
-      <div className="sc-player-details">
-        <span className="sc-player-name">{player.name}</span>
-        <span className="sc-player-role">{player.role}</span>
-      </div>
-
-      {/* Tier badge */}
-      <span className="sc-player-tier"
-        style={{ color: tc, borderColor: tc + '55' }}>
-        {player.tier}
-      </span>
+      {/* Name + role */}
+      <span className="sc-tile-name">{player.name}</span>
+      <span className="sc-tile-role">{player.role}</span>
 
       {/* Price */}
-      <div className="sc-player-price-col">
-        <span className="sc-sold-price">
-          ₹{Number(player.soldPrice || 0).toLocaleString()}
-        </span>
-        <span className="sc-base-price">
-          base ₹{Number(player.basePrice || 0).toLocaleString()}
-        </span>
-      </div>
-
+      <span className="sc-tile-price">
+        ₹{Number(player.soldPrice || 0).toLocaleString()}
+      </span>
+      <span className="sc-tile-base-price">
+        base ₹{Number(player.basePrice || 0).toLocaleString()}
+      </span>
     </motion.div>
   )
 }
