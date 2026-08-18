@@ -1,16 +1,15 @@
 import { useEffect, useCallback, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuctionStore } from '../store/auctionStore'
 import { useWebSocket } from '../hooks/useWebSocket'
-import { getDashboard, getBidMode, verifyTeamAccess } from '../api/auctionApi'
+import { getDashboard, getBidMode } from '../api/auctionApi'
 import PlayerCard from '../components/PlayerCard'
 import TimerRing from '../components/TimerRing'
 import SelfBidPanel from '../components/SelfBidPanel'
 
 export default function CaptainView() {
   const { tid } = useParams()
-  const navigate = useNavigate()
 
   const {
     team,
@@ -21,18 +20,13 @@ export default function CaptainView() {
     setAuctionState,
     setTimerState,
     setSpinResult,
-    setDashboard,
-    clearIdentity
+    setDashboard
   } = useAuctionStore()
 
   const [myTeamCard, setMyTeamCard] = useState(null)
 
   // ✅ Bid Mode
   const [bidMode, setBidModeState] = useState('ORGANIZER_CONTROLLED')
-
-  // ✅ Guards against stale/mismatched identity (e.g. bookmarked URL,
-  // shared link, or leftover session data from a different team/tournament)
-  const [identityChecked, setIdentityChecked] = useState(false)
 
   useWebSocket(useCallback((client) => {
     client.subscribe(`/topic/auction/${tid}`, (msg) => {
@@ -59,32 +53,6 @@ export default function CaptainView() {
     })
   }, [tid]))
 
-  // ✅ Validate that the captain identity in this tab's session actually
-  // belongs to this tournament/team before rendering anything sensitive.
-  // With sessionStorage this mostly guards against stale/bookmarked state;
-  // it's a cheap extra safety net on top of the storage fix.
-  useEffect(() => {
-    let cancelled = false
-
-    if (!team?.id) {
-      setIdentityChecked(true) // nothing to validate, let normal "no team" UI handle it
-      return
-    }
-
-    verifyTeamAccess(tid, team.id)
-      .then(() => {
-        if (!cancelled) setIdentityChecked(true)
-      })
-      .catch(() => {
-        if (!cancelled) {
-          clearIdentity()
-          navigate(`/auction/${tid}/join`, { replace: true })
-        }
-      })
-
-    return () => { cancelled = true }
-  }, [tid, team?.id])
-
   useEffect(() => {
     getDashboard(tid).then(r => setDashboard(r.data)).catch(() => {})
 
@@ -100,18 +68,6 @@ export default function CaptainView() {
   }, [dashboard, team])
 
   const isLeading = auctionState?.highBidderTeamId === team?.id
-
-  // ✅ Avoid flashing another team's stale data while identity is verified
-  if (!identityChecked) {
-    return (
-      <div className="captain-auction-bg">
-        <div className="waiting-spin">
-          <div className="spin-anim">🎰</div>
-          <p>Loading your team...</p>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="captain-auction-bg">
