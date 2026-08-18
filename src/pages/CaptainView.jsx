@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAuctionStore } from '../store/auctionStore'
 import { useWebSocket } from '../hooks/useWebSocket'
 import { getDashboard, getBidMode } from '../api/auctionApi'
+import { getMyTeam } from '../api/teamApi'
 import PlayerCard from '../components/PlayerCard'
 import TimerRing from '../components/TimerRing'
 import SelfBidPanel from '../components/SelfBidPanel'
@@ -17,6 +18,7 @@ export default function CaptainView() {
     timerState,
     spinResult,
     dashboard,
+    setTeam,
     setAuctionState,
     setTimerState,
     setSpinResult,
@@ -24,8 +26,9 @@ export default function CaptainView() {
   } = useAuctionStore()
 
   const [myTeamCard, setMyTeamCard] = useState(null)
+  const [teamLoading, setTeamLoading] = useState(false)
+  const [teamError, setTeamError] = useState('')
 
-  // ✅ Bid Mode
   const [bidMode, setBidModeState] = useState('ORGANIZER_CONTROLLED')
 
   useWebSocket(useCallback((client) => {
@@ -33,7 +36,6 @@ export default function CaptainView() {
       const data = JSON.parse(msg.body)
       setAuctionState(data)
 
-      // ✅ Listen for mode changes
       if (data.event === 'BID_MODE_CHANGED') {
         setBidModeState(data.bidMode)
       }
@@ -53,10 +55,26 @@ export default function CaptainView() {
     })
   }, [tid]))
 
+  // Restore team if missing (fresh tab, cleared storage, direct link, repeated refresh)
+  useEffect(() => {
+    if (!team && tid) {
+      setTeamLoading(true)
+      setTeamError('')
+      getMyTeam(tid)
+        .then(res => {
+          setTeam(res.data)
+        })
+        .catch(err => {
+          const msg = err.response?.data?.error || err.message || 'Could not load your team'
+          setTeamError(msg)
+          console.error('Could not restore team:', msg)
+        })
+        .finally(() => setTeamLoading(false))
+    }
+  }, [tid, team, setTeam])
+
   useEffect(() => {
     getDashboard(tid).then(r => setDashboard(r.data)).catch(() => {})
-
-    // ✅ Get bid mode after dashboard load attempt
     getBidMode(tid).then(r => setBidModeState(r.data.bidMode)).catch(() => {})
   }, [tid])
 
@@ -68,6 +86,27 @@ export default function CaptainView() {
   }, [dashboard, team])
 
   const isLeading = auctionState?.highBidderTeamId === team?.id
+
+  if (teamLoading) {
+    return (
+      <div className="captain-auction-bg">
+        <div style={{ padding: '2rem', textAlign: 'center' }}>
+          <p>Loading your team...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (teamError && !team) {
+    return (
+      <div className="captain-auction-bg">
+        <div style={{ padding: '2rem', textAlign: 'center' }}>
+          <p>⚠️ {teamError}</p>
+          <p>Please rejoin the tournament from your lobby link.</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="captain-auction-bg">
@@ -118,7 +157,6 @@ export default function CaptainView() {
             isPaused={timerState?.isPaused ?? false}
           />
 
-          {/* Current bid display */}
           <AnimatePresence>
             {auctionState?.currentBid != null && (
               <motion.div
@@ -139,19 +177,17 @@ export default function CaptainView() {
             )}
           </AnimatePresence>
 
-          {/* Mode 2: Captain self-bid panel */}
           {bidMode === 'CAPTAIN_SELF' ? (
             <SelfBidPanel
               tournamentId={Number(tid)}
               team={team}
               currentBid={auctionState?.currentBid ?? 0}
               basePrice={spinResult?.basePrice ?? 0}
-              phase={auctionState?.phase}   // keep phase source consistent with server state
+              phase={auctionState?.phase}
               bidIncrement={50}
               isHighBidder={isLeading}
             />
           ) : (
-            /* Mode 1: Captain just watches */
             <div className="captain-watch-mode">
               <div className="cwm-icon">🎙️</div>
               <p className="cwm-text">Organizer-controlled bidding</p>
