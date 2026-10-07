@@ -86,7 +86,29 @@ export default function PlayerManage() {
       setUploading(false)
     }
   }
-  
+
+  const handleBulkCSV = async (e) => {
+    e.preventDefault()
+    if (!csvFile) return toast.error('Select a CSV file first')
+    setUploading(true)
+    try {
+      const res = await bulkUploadPlayers(csvFile, Number(tid))
+      const data = res.data
+      const count = data.count || data.length || 0
+      // Reload full player list
+      const fresh = await getPlayers(tid)
+      setPlayers(fresh.data)
+      toast.success(`✅ ${count} players uploaded!`)
+      setCsv(null)
+    } catch (err) {
+      toast.error(
+        err.response?.data?.error || 'Bulk upload failed. Check CSV format.'
+      )
+    } finally {
+      setUploading(false)
+    }
+  }
+
   const handleBulkZIP = async (e) => {
     e.preventDefault()
     if (!zipFile) return toast.error('Select a ZIP file first')
@@ -212,39 +234,6 @@ export default function PlayerManage() {
               </button>
             ))}
           </div>
-          {/* Add this section ABOVE the name field in single player form */}
-<div className="cricheroes-fetch-section">
-  <div className="ch-header">
-    <span className="ch-logo">🏏</span>
-    <span className="ch-title">Auto-fill from CricHeroes</span>
-    <span className="ch-badge">Optional</span>
-  </div>
-
-  <p className="ch-desc">
-    Player pastes their CricHeroes profile URL
-    — stats fill automatically
-  </p>
-
-  <div className="ch-input-row">
-    <input
-      className="ch-url-input"
-      placeholder="https://cricheroes.in/player-profile/12345678/nikhil"
-      value={cricUrl}
-      onChange={e => setCricUrl(e.target.value)}
-    />
-    <motion.button
-      type="button"
-      className="ch-fetch-btn"
-      onClick={handleFetchCricHeroes}
-      disabled={fetchingStats || !cricUrl.trim()}
-      whileTap={{ scale: 0.97 }}>
-      {fetchingStats
-        ? <span className="ch-spinner" />
-        : '⚡ Fetch Stats'}
-    </motion.button>
-  </div>
-
-
 
           <AnimatePresence mode="wait">
             {/* SINGLE PLAYER */}
