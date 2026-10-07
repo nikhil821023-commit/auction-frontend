@@ -298,52 +298,7 @@ const handleFetchCricHeroes = async () => {
     </motion.button>
   </div>
 
-  {/* Show fetched stats preview */}
-  {fetchedStats && (
-    <motion.div className="ch-preview"
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}>
-      <div className="ch-preview-header">
-        ✅ Stats fetched from CricHeroes
-      </div>
-      <div className="ch-preview-stats">
-        {fetchedStats.matches && (
-          <div className="ch-stat">
-            <span>🎯 Matches</span>
-            <strong>{fetchedStats.matches}</strong>
-          </div>
-        )}
-        {fetchedStats.average && (
-          <div className="ch-stat">
-            <span>📊 Average</span>
-            <strong>{fetchedStats.average}</strong>
-          </div>
-        )}
-        {fetchedStats.strikeRate && (
-          <div className="ch-stat">
-            <span>⚡ Strike Rate</span>
-            <strong>{fetchedStats.strikeRate}</strong>
-          </div>
-        )}
-        {fetchedStats.wickets && (
-          <div className="ch-stat">
-            <span>🎳 Wickets</span>
-            <strong>{fetchedStats.wickets}</strong>
-          </div>
-        )}
-        {fetchedStats.runs && (
-          <div className="ch-stat">
-            <span>🏏 Runs</span>
-            <strong>{fetchedStats.runs}</strong>
-          </div>
-        )}
-      </div>
-      <p className="ch-edit-note">
-        ✏️ You can edit any values below before saving
-      </p>
-    </motion.div>
-  )}
-</div>
+
 
           <AnimatePresence mode="wait">
             {/* SINGLE PLAYER */}
