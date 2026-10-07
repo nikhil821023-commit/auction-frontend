@@ -87,14 +87,6 @@ export default function PlayerManage() {
     }
   }
 
-
-  // Add to state:
-const [cricUrl, setCricUrl]         = useState('')
-const [fetchingStats, setFetching]  = useState(false)
-const [fetchedStats, setFetchedStats] = useState(null)
-
-
-
   const handleBulkCSV = async (e) => {
     e.preventDefault()
     if (!csvFile) return toast.error('Select a CSV file first')
@@ -176,8 +168,6 @@ const [fetchedStats, setFetchedStats] = useState(null)
     }
   }
 
-  
-
   // ✅ FIX 2: fixed handleBulkRemove to await and work on correct snapshot of selected
   const handleBulkRemove = async () => {
     if (selected.size === 0) {
@@ -245,42 +235,6 @@ const [fetchedStats, setFetchedStats] = useState(null)
             ))}
           </div>
 
-          {/* Add this section ABOVE the name field in single player form */}
-<div className="cricheroes-fetch-section">
-  <div className="ch-header">
-    <span className="ch-logo">🏏</span>
-    <span className="ch-title">Auto-fill from CricHeroes</span>
-    <span className="ch-badge">Optional</span>
-  </div>
-
-  <p className="ch-desc">
-    Player pastes their CricHeroes profile URL
-    — stats fill automatically
-  </p>
-
-  <div className="ch-input-row">
-    <input
-      className="ch-url-input"
-      placeholder="https://cricheroes.in/player-profile/12345678/nikhil"
-      value={cricUrl}
-      onChange={e => setCricUrl(e.target.value)}
-    />
-    <motion.button
-      type="button"
-      className="ch-fetch-btn"
-      onClick={handleFetchCricHeroes}
-      disabled={fetchingStats || !cricUrl.trim()}
-      whileTap={{ scale: 0.97 }}>
-      {fetchingStats
-        ? <span className="ch-spinner" />
-        : '⚡ Fetch Stats'}
-    </motion.button>
-  </div>
-
-
-
-          
-          
           <AnimatePresence mode="wait">
             {/* SINGLE PLAYER */}
             {tab === 'single' && (
