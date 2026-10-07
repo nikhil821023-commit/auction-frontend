@@ -2790,4 +2790,74 @@ h1,h2,h3 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; }
 /* ── Loading hint stadium ──────────────────────────────────────── */
 .auction-bg .loading-hint { color: #c8ff00 !important; }
 
+/* ── CricHeroes Fetch Section ─────────────────────────────────── */
+.cricheroes-fetch-section {
+  background: linear-gradient(135deg, #0a1a0a, #0d1a0d);
+  border: 1px solid rgba(200,255,0,0.2);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+}
+.ch-header {
+  display: flex; align-items: center; gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+.ch-logo  { font-size: 1.1rem; }
+.ch-title { font-weight: 700; font-size: 0.9rem; color: #c8ff00; }
+.ch-badge {
+  font-size: 0.65rem; background: rgba(200,255,0,0.12);
+  color: #c8ff00; border: 1px solid rgba(200,255,0,0.3);
+  border-radius: 10px; padding: 0.1rem 0.45rem; font-weight: 600;
+}
+.ch-desc {
+  font-size: 0.78rem; color: var(--text-dim);
+  margin: 0 0 0.75rem; line-height: 1.4;
+}
+.ch-input-row {
+  display: flex; gap: 0.5rem;
+}
+.ch-url-input {
+  flex: 1; background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(200,255,0,0.2);
+  border-radius: 8px; color: var(--text);
+  padding: 0.6rem 0.85rem; font-size: 0.82rem;
+  outline: none;
+}
+.ch-url-input:focus { border-color: #c8ff00; }
+.ch-fetch-btn {
+  background: #c8ff00; color: #000; border: none;
+  border-radius: 8px; padding: 0.6rem 1rem;
+  font-weight: 700; font-size: 0.82rem; cursor: pointer;
+  white-space: nowrap; display: flex; align-items: center; gap: 0.3rem;
+}
+.ch-fetch-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.ch-spinner {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid #00000040; border-top-color: #000;
+  animation: spin 0.7s linear infinite; display: inline-block;
+}
+.ch-preview {
+  margin-top: 0.75rem;
+  background: rgba(200,255,0,0.05);
+  border: 1px solid rgba(200,255,0,0.15);
+  border-radius: 8px; padding: 0.75rem;
+}
+.ch-preview-header {
+  font-size: 0.8rem; font-weight: 700;
+  color: #c8ff00; margin-bottom: 0.6rem;
+}
+.ch-preview-stats {
+  display: flex; flex-wrap: wrap; gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.ch-stat {
+  background: rgba(0,0,0,0.3); border-radius: 7px;
+  padding: 0.35rem 0.65rem;
+  display: flex; flex-direction: column; gap: 0.1rem;
+}
+.ch-stat span  { font-size: 0.68rem; color: var(--text-dim); }
+.ch-stat strong { font-size: 0.92rem; color: #fff; }
+.ch-edit-note {
+  font-size: 0.72rem; color: var(--text-dim); margin: 0;
+}
 
