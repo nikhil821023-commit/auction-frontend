@@ -86,61 +86,7 @@ export default function PlayerManage() {
       setUploading(false)
     }
   }
-  // Add to state:
-const [cricUrl, setCricUrl]         = useState('')
-const [fetchingStats, setFetching]  = useState(false)
-const [fetchedStats, setFetchedStats] = useState(null)
-
-// Add handler:
-const handleFetchCricHeroes = async () => {
-  if (!cricUrl.trim()) return toast.error('Paste your CricHeroes profile URL')
-  setFetching(true)
-  try {
-    const res  = await api.get('/players/fetch-cricheroes',
-                   { params: { url: cricUrl } })
-    const data = res.data
-
-    // Auto-fill the form with fetched data
-    setForm(f => ({
-      ...f,
-      name:       data.name       || f.name,
-      role:       data.role       || f.role,
-      matches:    data.matches    || f.matches,
-      average:    data.average    || f.average,
-      strikeRate: data.strikeRate || f.strikeRate,
-    }))
-
-    setFetchedStats(data)
-    toast.success(`✅ Stats fetched for ${data.name}!`)
-  } catch (err) {
-    toast.error(err.response?.data?.error || 'Could not fetch stats')
-  } finally {
-    setFetching(false)
-  }
-}
-
-  const handleBulkCSV = async (e) => {
-    e.preventDefault()
-    if (!csvFile) return toast.error('Select a CSV file first')
-    setUploading(true)
-    try {
-      const res = await bulkUploadPlayers(csvFile, Number(tid))
-      const data = res.data
-      const count = data.count || data.length || 0
-      // Reload full player list
-      const fresh = await getPlayers(tid)
-      setPlayers(fresh.data)
-      toast.success(`✅ ${count} players uploaded!`)
-      setCsv(null)
-    } catch (err) {
-      toast.error(
-        err.response?.data?.error || 'Bulk upload failed. Check CSV format.'
-      )
-    } finally {
-      setUploading(false)
-    }
-  }
-
+  
   const handleBulkZIP = async (e) => {
     e.preventDefault()
     if (!zipFile) return toast.error('Select a ZIP file first')
