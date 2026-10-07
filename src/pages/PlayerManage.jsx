@@ -87,6 +87,40 @@ export default function PlayerManage() {
     }
   }
 
+
+  // Add to state:
+const [cricUrl, setCricUrl]         = useState('')
+const [fetchingStats, setFetching]  = useState(false)
+const [fetchedStats, setFetchedStats] = useState(null)
+
+// Add handler:
+const handleFetchCricHeroes = async () => {
+  if (!cricUrl.trim()) return toast.error('Paste your CricHeroes profile URL')
+  setFetching(true)
+  try {
+    const res  = await api.get('/players/fetch-cricheroes',
+                   { params: { url: cricUrl } })
+    const data = res.data
+
+    // Auto-fill the form with fetched data
+    setForm(f => ({
+      ...f,
+      name:       data.name       || f.name,
+      role:       data.role       || f.role,
+      matches:    data.matches    || f.matches,
+      average:    data.average    || f.average,
+      strikeRate: data.strikeRate || f.strikeRate,
+    }))
+
+    setFetchedStats(data)
+    toast.success(`✅ Stats fetched for ${data.name}!`)
+  } catch (err) {
+    toast.error(err.response?.data?.error || 'Could not fetch stats')
+  } finally {
+    setFetching(false)
+  }
+}
+
   const handleBulkCSV = async (e) => {
     e.preventDefault()
     if (!csvFile) return toast.error('Select a CSV file first')
@@ -168,6 +202,8 @@ export default function PlayerManage() {
     }
   }
 
+  
+
   // ✅ FIX 2: fixed handleBulkRemove to await and work on correct snapshot of selected
   const handleBulkRemove = async () => {
     if (selected.size === 0) {
@@ -235,6 +271,87 @@ export default function PlayerManage() {
             ))}
           </div>
 
+          {/* Add this section ABOVE the name field in single player form */}
+<div className="cricheroes-fetch-section">
+  <div className="ch-header">
+    <span className="ch-logo">🏏</span>
+    <span className="ch-title">Auto-fill from CricHeroes</span>
+    <span className="ch-badge">Optional</span>
+  </div>
+
+  <p className="ch-desc">
+    Player pastes their CricHeroes profile URL
+    — stats fill automatically
+  </p>
+
+  <div className="ch-input-row">
+    <input
+      className="ch-url-input"
+      placeholder="https://cricheroes.in/player-profile/12345678/nikhil"
+      value={cricUrl}
+      onChange={e => setCricUrl(e.target.value)}
+    />
+    <motion.button
+      type="button"
+      className="ch-fetch-btn"
+      onClick={handleFetchCricHeroes}
+      disabled={fetchingStats || !cricUrl.trim()}
+      whileTap={{ scale: 0.97 }}>
+      {fetchingStats
+        ? <span className="ch-spinner" />
+        : '⚡ Fetch Stats'}
+    </motion.button>
+  </div>
+
+  {/* Show fetched stats preview */}
+  {fetchedStats && (
+    <motion.div className="ch-preview"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}>
+      <div className="ch-preview-header">
+        ✅ Stats fetched from CricHeroes
+      </div>
+      <div className="ch-preview-stats">
+        {fetchedStats.matches && (
+          <div className="ch-stat">
+            <span>🎯 Matches</span>
+            <strong>{fetchedStats.matches}</strong>
+          </div>
+        )}
+        {fetchedStats.average && (
+          <div className="ch-stat">
+            <span>📊 Average</span>
+            <strong>{fetchedStats.average}</strong>
+          </div>
+        )}
+        {fetchedStats.strikeRate && (
+          <div className="ch-stat">
+            <span>⚡ Strike Rate</span>
+            <strong>{fetchedStats.strikeRate}</strong>
+          </div>
+        )}
+        {fetchedStats.wickets && (
+          <div className="ch-stat">
+            <span>🎳 Wickets</span>
+            <strong>{fetchedStats.wickets}</strong>
+          </div>
+        )}
+        {fetchedStats.runs && (
+          <div className="ch-stat">
+            <span>🏏 Runs</span>
+            <strong>{fetchedStats.runs}</strong>
+          </div>
+        )}
+      </div>
+      <p className="ch-edit-note">
+        ✏️ You can edit any values below before saving
+      </p>
+    </motion.div>
+  )}
+</div>
+
+          
+          
           <AnimatePresence mode="wait">
             {/* SINGLE PLAYER */}
             {tab === 'single' && (
