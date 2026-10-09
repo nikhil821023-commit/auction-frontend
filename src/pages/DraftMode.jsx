@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import api from '../api/axios'
 import { useWebSocket } from '../hooks/useWebSocket'
-import { playerImageUrl } from './PlayerManage'
+import { playerImageUrl } from '../utils/imageUrl'
 
 // ── API helpers ───────────────────────────────────────────────────
 const draftApi = {
