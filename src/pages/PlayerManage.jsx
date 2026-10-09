@@ -536,7 +536,6 @@ export default function PlayerManage() {
           </motion.button>
         </motion.div>
 
-        // In PlayerManage.jsx header/action area — add alongside existing buttons:
 <motion.button className="btn-primary"
   onClick={() => navigate(`/draft/${tid}`)}
   whileTap={{ scale: 0.97 }}>
