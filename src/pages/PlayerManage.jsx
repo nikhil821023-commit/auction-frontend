@@ -536,6 +536,14 @@ export default function PlayerManage() {
           </motion.button>
         </motion.div>
 
+        // In PlayerManage.jsx header/action area — add alongside existing buttons:
+<motion.button className="btn-primary"
+  onClick={() => navigate(`/draft/${tid}`)}
+  whileTap={{ scale: 0.97 }}>
+  🎯 Start Draft Mode
+</motion.button>
+        
+
         {/* RIGHT: player list panel */}
         <motion.div className="player-list-panel"
           initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }}>
