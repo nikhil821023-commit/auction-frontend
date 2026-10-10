@@ -536,11 +536,7 @@ export default function PlayerManage() {
           </motion.button>
         </motion.div>
 
-<motion.button className="btn-primary"
-  onClick={() => navigate(`/draft/${tid}`)}
-  whileTap={{ scale: 0.97 }}>
-  🎯 Start Draft Mode
-</motion.button>
+
         
 
         {/* RIGHT: player list panel */}
