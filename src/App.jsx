@@ -22,7 +22,7 @@ import ProjectorView    from './pages/ProjectorView'
 import AuthPage         from './pages/AuthPage'
 import { usePageTracking } from './hooks/usePageTracking'
 import { useAuthStore } from './store/authStore'
-import DraftMode from './pages/DraftMode'
+
 
 // ── Protected route wrapper ──────────────────────────────
 function Protected({ children }) {
@@ -78,9 +78,7 @@ function AppWithTracking() {
       <Route path="/projector/:tid"           element={<ProjectorView />} />
       <Route path="/admin"                    element={<AdminDashboard />} />
 
-      <Route path="/draft/:tid" element={
-  <Protected><DraftMode /></Protected>
-} />
+  
     </Routes>
   )
 }
