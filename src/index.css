@@ -2861,3 +2861,10 @@ h1,h2,h3 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; }
   font-size: 0.72rem; color: var(--text-dim); margin: 0;
 }
 
+
+.bp-quick-bids { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.bp-quick-btn { padding: 8px 12px; border-radius: 8px; border: 1px solid #444;
+  background: transparent; color: inherit; cursor: pointer; font-weight: 600; }
+.bp-quick-btn.active { background: var(--tc, #e63946); border-color: var(--tc, #e63946); color: #fff; }
+.bp-quick-btn.disabled, .bp-quick-btn:disabled { opacity: .35; cursor: not-allowed; }
+
