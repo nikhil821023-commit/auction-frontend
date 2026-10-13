@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { placeBid } from '../api/auctionApi'
 import toast from 'react-hot-toast'
-import './BidPanel.css'
+
 
 const getId = (t) => t.id || t.teamId
 const getBudget = (t) => t.remainingBudget ?? t.totalBudget ?? 0
