@@ -2916,3 +2916,247 @@ h1,h2,h3 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; }
 }
 
 
+export const teamSquadCardCSS = `
+/* ══════════════════════════════════════════════════════════════════
+   TEAM SQUAD CARD — Dashboard
+══════════════════════════════════════════════════════════════════ */
+ 
+/* Dashboard grid */
+.dash-teams-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+.dash-teams-empty {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-dim);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+.dash-teams-empty span { font-size: 3rem; }
+ 
+/* Card */
+.tsq-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+.tsq-card:hover {
+  box-shadow: 0 0 24px color-mix(in srgb, var(--tc) 15%, transparent);
+}
+.tsq-top-bar { height: 3px; }
+ 
+/* Header */
+.tsq-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0.9rem 1rem 0.5rem;
+}
+.tsq-header-left { display: flex; align-items: center; gap: 0.6rem; }
+.tsq-rank {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  color: rgba(255,255,255,0.15);
+  line-height: 1;
+  min-width: 24px;
+}
+.tsq-team-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+.tsq-captain { font-size: 0.75rem; color: var(--text-dim); }
+ 
+/* Status badge */
+.tsq-status-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.tsq-status-badge.complete {
+  background: rgba(34,197,94,0.12);
+  color: #22c55e;
+  border: 1px solid rgba(34,197,94,0.3);
+}
+.tsq-status-badge.warning {
+  background: rgba(245,158,11,0.12);
+  color: #f59e0b;
+  border: 1px solid rgba(245,158,11,0.3);
+}
+.tsq-status-badge.active {
+  background: color-mix(in srgb, var(--tc) 10%, transparent);
+  color: var(--tc);
+  border: 1px solid color-mix(in srgb, var(--tc) 30%, transparent);
+}
+ 
+/* Squad section */
+.tsq-squad-section {
+  padding: 0 1rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+.tsq-squad-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.tsq-label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+.tsq-squad-fraction { display: flex; align-items: baseline; gap: 2px; }
+.tsq-bought { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--tc); line-height: 1; }
+.tsq-divider { font-size: 0.9rem; color: var(--text-dim); }
+.tsq-max { font-size: 0.9rem; color: var(--text-dim); }
+ 
+/* Slot dots */
+.tsq-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 0.5rem;
+}
+.tsq-slot {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  transition: background 0.3s;
+}
+.tsq-slot.filled { }
+.tsq-slot.empty  { background: rgba(255,255,255,0.08); }
+ 
+/* Progress bar */
+.tsq-prog-bg {
+  height: 5px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 50px;
+  overflow: hidden;
+  margin-bottom: 0.4rem;
+}
+.tsq-prog-fill { height: 100%; border-radius: 50px; }
+ 
+.tsq-needed {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+.tsq-needed.low { color: #f59e0b; }
+.tsq-budget-risk { color: #ef4444; }
+ 
+/* Budget section */
+.tsq-budget-section {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.tsq-budget-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+.tsq-budget-pct { font-size: 0.78rem; font-weight: 700; }
+.tsq-budget-bar-bg {
+  height: 5px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 50px;
+  overflow: hidden;
+  margin-bottom: 0.65rem;
+}
+.tsq-budget-bar-fill { height: 100%; border-radius: 50px; }
+ 
+.tsq-budget-nums {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+}
+.tsq-budget-item {
+  background: var(--bg3);
+  border-radius: 7px;
+  padding: 0.4rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.tsq-budget-item span  { font-size: 0.65rem; color: var(--text-dim); }
+.tsq-budget-item strong { font-size: 0.85rem; color: var(--text); }
+ 
+/* Players section */
+.tsq-players-section { border-top: 1px solid var(--border); }
+.tsq-expand-btn {
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  padding: 0.65rem 1rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: color 0.15s;
+  font-family: inherit;
+}
+.tsq-expand-btn:hover { color: var(--tc); }
+ 
+.tsq-players-list {
+  overflow: hidden;
+  padding: 0 0.6rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.tsq-player-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--bg3);
+  border-radius: 8px;
+  padding: 0.45rem 0.65rem;
+}
+.tsq-pr-photo {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  flex-shrink: 0;
+}
+.tsq-pr-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--bg2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  border: 1.5px solid rgba(255,255,255,0.1);
+}
+.tsq-pr-info { flex: 1; display: flex; flex-direction: column; gap: 0.05rem; }
+.tsq-pr-name { font-size: 0.82rem; font-weight: 700; }
+.tsq-pr-role { font-size: 0.68rem; color: var(--text-dim); }
+.tsq-pr-right { display: flex; flex-direction: column; align-items: flex-end; gap: 0.15rem; }
+.tsq-pr-tier {
+  font-size: 0.62rem;
+  font-weight: 700;
+  border: 1px solid;
+  border-radius: 6px;
+  padding: 0.05rem 0.35rem;
+  letter-spacing: 0.5px;
+}
+.tsq-pr-price {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.9rem;
+  color: var(--gold);
+}
+
+
