@@ -4,9 +4,8 @@ import { motion } from 'framer-motion'
 import { useAuctionStore } from '../store/auctionStore'
 import { useWebSocket } from '../hooks/useWebSocket'
 import { getDashboard } from '../api/auctionApi'
-import TeamBudgetCard from '../components/TeamBudgetCard'
+import TeamSquadCard from '../components/TeamSquadCard'
 import AuctionFeed from '../components/AuctionFeed'
-import { playerImageUrl } from '../utils/imageUrl'
 
 export default function Dashboard() {
   const { tid } = useParams()
@@ -35,13 +34,15 @@ export default function Dashboard() {
       </div>
     )
 
+  // Squad limit is set by the organiser. null/undefined = no limit.
+  const maxPlayers = dashboard.maxPlayersPerTeam ?? null
+
   return (
     <div className="dashboard-bg">
       <div className="dashboard-header">
         <div className="dashboard-topbar">
           <h1 className="dashboard-title">📊 {dashboard.tournamentName}</h1>
 
-          {/* ✅ NEW: Final Results button */}
           <motion.button
             className="btn-accent"
             onClick={() => navigate(`/post-auction/${tid}`)}
@@ -55,20 +56,25 @@ export default function Dashboard() {
           <span>🔨 Sold: {dashboard.playersSold}</span>
           <span>❌ Unsold: {dashboard.playersUnsold}</span>
           <span>⏳ Remaining: {dashboard.playersRemaining}</span>
+          {maxPlayers != null && <span>👥 Squad limit: {maxPlayers}</span>}
         </div>
       </div>
 
       <div className="dashboard-layout">
         <div className="teams-grid">
-          {dashboard.teams?.map((team, i) => (
+          {(dashboard.teams || []).map((team, i) => (
             <motion.div
-              key={team.teamId}
+              key={team.teamId || team.id}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08 }}
               layout
             >
-              <TeamBudgetCard team={team} />
+              <TeamSquadCard
+                team={team}
+                maxPlayers={team.maxPlayers ?? maxPlayers}
+                rank={i}
+              />
             </motion.div>
           ))}
         </div>
