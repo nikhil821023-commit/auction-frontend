@@ -94,8 +94,7 @@ const getSmartCap = (team) => {
         current + bidIncrement * 5,
         current + bidIncrement * 10
       ]
-  ).filter(v => v > 0)
-  . .filter(v => !selectedCap || v <= selectedCap.maxBid)
+  ).filter(v => v > 0 && (!selectedCap || v <= selectedCap.maxBid))
 
   // Amount that will actually be submitted
   const effectiveAmount = inputMode === 'manual' && customAmt
