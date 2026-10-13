@@ -2,6 +2,34 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { placeBid } from '../api/auctionApi'
 import toast from 'react-hot-toast'
+import './BidPanel.css'
+
+const getId = (t) => t.id || t.teamId
+const getBudget = (t) => t.remainingBudget ?? t.totalBudget ?? 0
+const getBought = (t) => t.playersBought || t.squadCount || 0
+
+// ── Smart Budget Cap ────────────────────────────────────────────────
+// Reserves base price for every other player the team still needs,
+// so a team can never spend itself out of completing its squad.
+function getSmartCap(team, maxSquadSize, basePrice) {
+  if (!team) return null
+  if (!maxSquadSize || maxSquadSize <= 0) return null
+  if (!basePrice || basePrice <= 0) return null
+
+  const stillNeeded = maxSquadSize - getBought(team)
+  if (stillNeeded <= 1) return null // last player — no cap
+
+  const budget         = getBudget(team)
+  const reservedBudget = (stillNeeded - 1) * basePrice
+  const maxBid         = budget - reservedBudget
+
+  return {
+    stillNeeded,
+    reservedBudget,
+    maxBid:  Math.max(maxBid, basePrice),
+    isAtCap: maxBid <= basePrice
+  }
+}
 
 export default function BidPanel({
   teams = [],
@@ -14,113 +42,76 @@ export default function BidPanel({
   currentBid = 0,
   basePrice = 0,
   hasBids,
-  maxSquadSize = null,
+  maxSquadSize = null
 }) {
-  const [selected, setSelected]     = useState(null)
-  const [customAmt, setCustomAmt]   = useState('')
-  const [inputMode, setInputMode]   = useState('auto')
+  const [selectedId, setSelectedId] = useState(null)
+  const [amount, setAmount]         = useState(0)
   const [submitting, setSubmitting] = useState(false)
 
-  useEffect(() => {
-    if (phase === 'BIDDING' || phase === 'PLAYER_REVEAL') {
-      setSelected(null)
-      setCustomAmt('')
-      setInputMode('auto')
-    }
-  }, [phase, basePrice])
-
-  if (phase !== 'BIDDING') return null
-
+  // ── Derived values (plain calculations, no hooks) ─────────────────
   const current = currentBid ?? 0
 
   const isFirstBid = hasBids !== undefined
     ? !hasBids
     : (!current || current <= basePrice)
 
-  // ── Smart Budget Cap ────────────────────────────────────────────
-  const getSmartCap = (team) => {
-    if (!team) return null
-
-    if (!maxSquadSize || maxSquadSize <= 0) return null
-
-
-    
-    const squadSize   = maxSquadSize 
-    const bought      = team.playersBought || team.squadCount || 0
-    const stillNeeded = squadSize - bought
-    const budget      = team.remainingBudget ?? team.totalBudget ?? 0
-
-    if (stillNeeded <= 1) return null // last player — no cap
-    if (!basePrice || basePrice <= 0) return null
-
-
-    const reservedBudget = (stillNeeded - 1) * basePrice
-    const maxBid         = budget - reservedBudget
-
-    return {
-      stillNeeded,
-      reservedBudget,
-      maxBid:   Math.max(maxBid, basePrice),
-      isAtCap:  maxBid <= basePrice,
-    }
-  }
-
-  // First bid → base price. Later bids → current + increment.
   const nextAutoBid = isFirstBid ? basePrice : current + bidIncrement
+  const minBid      = isFirstBid ? basePrice : current + 1
 
-  // Lowest amount accepted for a custom bid
-  const minBid = isFirstBid ? basePrice : current + 1
+  const selected    = teams.find((t) => getId(t) === selectedId) || null
+  const selectedCap = selected ? getSmartCap(selected, maxSquadSize, basePrice) : null
 
-  // Quick amounts — filtered by cap
-  const selectedCap = selected ? getSmartCap(selected) : null
+  // Most a team can bid: its budget, further limited by the smart cap
+  const limitFor = (team) => {
+    const cap = getSmartCap(team, maxSquadSize, basePrice)
+    const budget = getBudget(team)
+    return cap ? Math.min(budget, cap.maxBid) : budget
+  }
+  const isFull = (team) =>
+    !!maxSquadSize && maxSquadSize > 0 && getBought(team) >= maxSquadSize
+
+  const limit = selected ? limitFor(selected) : 0
 
   const quickAmounts = (isFirstBid
-    ? [
-        basePrice,
-        basePrice + bidIncrement,
-        basePrice + bidIncrement * 2,
-        basePrice + bidIncrement * 5,
-      ]
-    : [
-        current + bidIncrement,
-        current + bidIncrement * 2,
-        current + bidIncrement * 5,
-        current + bidIncrement * 10,
-      ]
-  ).filter(v => v > 0 && (!selectedCap || v <= selectedCap.maxBid))
+    ? [basePrice, basePrice + bidIncrement, basePrice + bidIncrement * 2, basePrice + bidIncrement * 5]
+    : [current + bidIncrement, current + bidIncrement * 2, current + bidIncrement * 5, current + bidIncrement * 10]
+  ).filter((v) => v > 0)
 
-  // Amount that will actually be submitted
-  const effectiveAmount = inputMode === 'manual' && customAmt
-    ? parseFloat(customAmt) || 0
-    : nextAutoBid
-
-  const handleSelectTeam = (team) => {
-    setSelected(team)
-    setCustomAmt('')
-    setInputMode('auto')
-  }
-
-  const handleQuickBid = (amt) => {
-    if (amt === nextAutoBid) {
-      setInputMode('auto')
-      setCustomAmt('')
-    } else {
-      setInputMode('manual')
-      setCustomAmt(String(amt))
+  // New player / bidding opened → reset the dock
+  useEffect(() => {
+    if (phase === 'BIDDING' || phase === 'PLAYER_REVEAL') {
+      setSelectedId(null)
+      setAmount(0)
     }
+  }, [phase, basePrice])
+
+  // Someone else bid while a team is selected → keep amount valid
+  useEffect(() => {
+    setAmount((a) => (selectedId != null && a < minBid ? minBid : a))
+  }, [minBid, selectedId])
+
+  if (phase !== 'BIDDING') return null
+
+  // ── Handlers ──────────────────────────────────────────────────────
+  const selectTeam = (team) => {
+    setSelectedId(getId(team))
+    setAmount(nextAutoBid)
   }
 
-  const handleSubmitBid = async () => {
+  const step = (dir) => {
+    setAmount((a) => {
+      const next  = (a || minBid) + dir * bidIncrement
+      const upper = limit >= minBid ? limit : next
+      return Math.min(upper, Math.max(minBid, next))
+    })
+  }
+
+  const handleConfirm = async () => {
     if (!selected) {
       toast.error('Select a team first')
       return
     }
-
-    const amount = inputMode === 'manual'
-      ? parseFloat(customAmt)
-      : nextAutoBid
-
-    if (isNaN(amount)) {
+    if (!amount || isNaN(amount)) {
       toast.error('Enter a valid amount')
       return
     }
@@ -130,15 +121,18 @@ export default function BidPanel({
         toast.error(`Minimum bid is ₹${basePrice} (base price)`)
         return
       }
-    } else {
-      if (amount <= current) {
-        toast.error(`Bid must be higher than ₹${current.toLocaleString()}`)
-        return
-      }
+    } else if (amount <= current) {
+      toast.error(`Bid must be higher than ₹${current.toLocaleString()}`)
+      return
+    }
+
+    if (amount > getBudget(selected)) {
+      toast.error(`Insufficient budget. Remaining ₹${getBudget(selected).toLocaleString()}`)
+      return
     }
 
     // Smart budget cap validation
-    const cap = getSmartCap(selected)
+    const cap = getSmartCap(selected, maxSquadSize, basePrice)
     if (cap && amount > cap.maxBid) {
       toast.error(
         `Budget cap! Max bid is ₹${Math.floor(cap.maxBid)}. ` +
@@ -152,18 +146,17 @@ export default function BidPanel({
     setSubmitting(true)
     try {
       await placeBid(tournamentId, {
-        teamId:           selected.id || selected.teamId,
+        teamId:           getId(selected),
         captainName:      selected.captainName,
         teamName:         selected.teamName,
         teamColor:        selected.teamColor,
         bidAmount:        amount,
         useAutoIncrement: false,
-        bidMode:          'ORGANIZER_CONTROLLED',
+        bidMode:          'ORGANIZER_CONTROLLED'
       })
       toast.success(`✅ ₹${amount.toLocaleString()} — ${selected.captainName}`)
-      setSelected(null)
-      setCustomAmt('')
-      setInputMode('auto')
+      setSelectedId(null)
+      setAmount(0)
     } catch (err) {
       toast.error(err.response?.data?.error || 'Bid failed')
     } finally {
@@ -171,277 +164,156 @@ export default function BidPanel({
     }
   }
 
-  // ── Loading ─────────────────────────────────────────────────────
+  // ── Loading / error ───────────────────────────────────────────────
   if (teamsLoading) {
     return (
-      <div className="bid-panel-v2">
-        <div className="bp-header">
-          <span className="bp-title">🎙️ ORGANIZER BID PANEL</span>
-        </div>
-        <div className="bp-teams-loading">
-          <div className="bp-loading-spinner" />
-          <span>Loading teams...</span>
-        </div>
+      <div className="bd-dock">
+        <div className="bd-head"><span className="bd-title">🎙️ BID DOCK</span></div>
+        <div className="bd-msg">Loading teams...</div>
       </div>
     )
   }
 
-  // ── Error ───────────────────────────────────────────────────────
   if (teamsError || teams.length === 0) {
     return (
-      <div className="bid-panel-v2">
-        <div className="bp-header">
-          <span className="bp-title">🎙️ ORGANIZER BID PANEL</span>
-        </div>
-        <div className="bp-teams-error">
-          <span>👥 {teamsError || 'No teams found'}</span>
+      <div className="bd-dock">
+        <div className="bd-head"><span className="bd-title">🎙️ BID DOCK</span></div>
+        <div className="bd-msg">
+          👥 {teamsError || 'No teams found'}
           {onRetryTeams && (
-            <motion.button
-              className="btn-accent bp-retry-btn"
-              onClick={onRetryTeams}
-              whileTap={{ scale: 0.97 }}>
-              🔄 Retry
-            </motion.button>
+            <button className="bd-retry" onClick={onRetryTeams}>🔄 Retry</button>
           )}
         </div>
       </div>
     )
   }
 
-  // ── Main panel ──────────────────────────────────────────────────
+  const accent    = selected?.teamColor || '#e63946'
+  const overLimit = !!selected && amount > limit
+
+  // ── Main dock ─────────────────────────────────────────────────────
   return (
-    <div className="bid-panel-v2">
+    <div className="bd-dock">
 
-      {/* Header */}
-      <div className="bp-header">
-        <span className="bp-title">🎙️ ORGANIZER BID PANEL</span>
-        <span className="bp-subtitle">Select captain who shouted the bid</span>
-      </div>
-
-      {/* Current / Next auto bid */}
-      <div className="bp-current-bar">
-        <span className="bp-current-label">
-          {isFirstBid ? 'Base price' : 'Current'}
-        </span>
-        <span className="bp-current-amount">
-          ₹{(isFirstBid ? basePrice : current).toLocaleString()}
-        </span>
-        <span className="bp-next-label">
-          {isFirstBid ? 'First bid' : 'Next auto'}
-        </span>
-        <span className="bp-next-amount">
-          ₹{nextAutoBid.toLocaleString()}
+      {/* Header: label + what the next bid is */}
+      <div className="bd-head">
+        <span className="bd-title">🎙️ BID DOCK</span>
+        <span className="bd-next">
+          {isFirstBid ? 'First bid' : 'Next'} <b>₹{nextAutoBid.toLocaleString()}</b>
         </span>
       </div>
 
-      {/* ✅ FIXED: captain grid properly wrapped in a div */}
-      <div className="bp-captains-grid">
-        {teams.map((team, i) => {
-          const teamId     = team.id || team.teamId
-          const isSelected = selected?.id === teamId
-                          || selected?.teamId === teamId
-          const budget     = team.remainingBudget ?? team.totalBudget ?? 0
-          const cap        = getSmartCap(team)
-          const canAfford  = budget >= (isFirstBid ? basePrice : effectiveAmount)
-          const atCap      = cap?.isAtCap
+      {/* Captain chips — one compact row, tap to select */}
+      <div className="bd-chips">
+        {teams.map((team) => {
+          const id     = getId(team)
+          const color  = team.teamColor || '#e63946'
+          const budget = getBudget(team)
+          const cap    = getSmartCap(team, maxSquadSize, basePrice)
+          const full   = isFull(team)
+          const ok     = limitFor(team) >= nextAutoBid && !full
+          const isSel  = id === selectedId
 
           return (
-            <motion.button
-              key={teamId}
-              className={`bp-captain-btn
-                ${isSelected  ? 'selected' : ''}
-                ${!canAfford  ? 'broke'    : ''}
-                ${atCap       ? 'at-cap'   : ''}`}
-              style={{ '--tc': team.teamColor || '#e63946' }}
-              onClick={() => canAfford && handleSelectTeam(team)}
-              title={cap
-                ? `Max bid: ₹${Math.floor(cap.maxBid)} — ₹${cap.reservedBudget} reserved for ${cap.stillNeeded - 1} more players`
-                : ''}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              whileHover={canAfford ? { scale: 1.02 } : {}}
-              whileTap={canAfford   ? { scale: 0.97 } : {}}>
-
-              <div className="bp-btn-colorbar"
-                style={{ background: team.teamColor || '#e63946' }} />
-
-              <div className="bp-btn-body">
-                <span className="bp-btn-captain">{team.captainName}</span>
-                <span className="bp-btn-team">{team.teamName}</span>
-                <span className={`bp-btn-budget ${!canAfford ? 'low' : ''}`}>
-                  ₹{budget.toLocaleString()}
-                  {!canAfford && ' ⚠️'}
-                </span>
-                {cap && (
-                  <span className="bp-btn-cap">
-                    {atCap
-                      ? `🔒 Max ₹${basePrice}`
-                      : `🎯 Max ₹${Math.floor(cap.maxBid)}`}
-                  </span>
-                )}
-              </div>
-
-              {isSelected && (
-                <motion.div className="bp-selected-tick"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}>
-                  ✓
-                </motion.div>
-              )}
-            </motion.button>
+            <button
+              key={id}
+              className={`bd-chip ${isSel ? 'sel' : ''} ${!ok ? 'off' : ''}`}
+              style={{ '--tc': color }}
+              disabled={!ok}
+              onClick={() => selectTeam(team)}
+              title={
+                full ? 'Squad full'
+                : cap ? `Max bid ₹${Math.floor(cap.maxBid)} — ₹${cap.reservedBudget} reserved for ${cap.stillNeeded - 1} more players`
+                : !ok ? `Cannot afford ₹${nextAutoBid.toLocaleString()}`
+                : ''
+              }>
+              <span className="bd-dot" />
+              <span className="bd-chip-main">
+                <b>{team.captainName}</b>
+                <i>{team.teamName}</i>
+              </span>
+              <span className="bd-chip-money">
+                ₹{budget.toLocaleString()}
+                {full
+                  ? <em>FULL</em>
+                  : cap && (
+                    <em>
+                      {cap.isAtCap
+                        ? `🔒 Max ₹${basePrice}`
+                        : `🎯 Max ₹${Math.floor(cap.maxBid)}`}
+                    </em>
+                  )}
+              </span>
+            </button>
           )
         })}
       </div>
 
-      {/* Confirm panel */}
-      <AnimatePresence>
+      {/* Action bar — appears once a captain is picked */}
+      <AnimatePresence initial={false}>
         {selected && (
           <motion.div
-            className="bp-confirm-panel"
-            style={{ borderColor: selected.teamColor || '#e63946' }}
-            initial={{ opacity: 0, y: 16, height: 0 }}
-            animate={{ opacity: 1, y: 0,  height: 'auto' }}
-            exit={{ opacity: 0,    y: 8,  height: 0 }}>
+            className="bd-action"
+            style={{ '--tc': accent }}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}>
 
-            {/* Confirm header */}
-            <div className="bp-confirm-header">
-              <div className="bp-confirm-dot"
-                style={{ background: selected.teamColor }} />
-              <span className="bp-confirm-name">
-                {selected.captainName}
-              </span>
-              <span className="bp-confirm-team">
-                — {selected.teamName}
-              </span>
-              <button className="bp-cancel-btn"
-                onClick={() => setSelected(null)}>
-                ✕
-              </button>
-            </div>
+            {/* Budget cap info — one line */}
+            {selectedCap && (
+              <div className={`bd-cap ${selectedCap.isAtCap ? 'lock' : ''}`}>
+                {selectedCap.isAtCap
+                  ? `🔒 At cap — base price ₹${basePrice} only (${selectedCap.stillNeeded - 1} more players needed)`
+                  : `🎯 Budget cap · ${selectedCap.stillNeeded - 1} more needed · ₹${selectedCap.reservedBudget} reserved · Max ₹${Math.floor(selectedCap.maxBid)}`}
+              </div>
+            )}
 
-            {/* ✅ Budget cap warning */}
-            {(() => {
-              const cap = getSmartCap(selected)
-              if (!cap) return null
-              return (
-                <motion.div
-                  className="bp-cap-warning"
-                  style={{ '--tc': selected.teamColor }}
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}>
-                  <div className="bp-cap-row">
-                    <span className="bp-cap-icon">🎯</span>
-                    <span className="bp-cap-text">
-                      <strong>Budget Cap Active</strong>
-                      <span>
-                        {cap.stillNeeded - 1} more players needed
-                        · ₹{cap.reservedBudget} reserved
-                      </span>
-                    </span>
-                    <span className="bp-cap-max">
-                      Max: ₹{Math.floor(cap.maxBid)}
-                    </span>
-                  </div>
-                  {cap.isAtCap && (
-                    <div className="bp-cap-alert">
-                      ⚠️ Can only bid base price ₹{basePrice} on remaining players
-                    </div>
-                  )}
-                </motion.div>
-              )
-            })()}
-
-            {/* Quick bid buttons */}
-            <div className="bp-quick-bids">
-              {quickAmounts.map((amt, i) => {
-                const selectedBudget =
-                  selected.remainingBudget ?? selected.totalBudget ?? 0
-                const tooExpensive = amt > selectedBudget
-
-                return (
-                  <motion.button
-                    key={amt}
-                    className={`bp-quick-btn
-                      ${effectiveAmount === amt ? 'active'    : ''}
-                      ${tooExpensive            ? 'disabled'  : ''}`}
-                    disabled={tooExpensive}
-                    onClick={() => handleQuickBid(amt)}
-                    whileTap={tooExpensive ? {} : { scale: 0.95 }}>
-                    {isFirstBid && i === 0
-                      ? `₹${amt.toLocaleString()} (Base)`
-                      : `₹${amt.toLocaleString()}`}
-                  </motion.button>
-                )
-              })}
-            </div>
-
-            {/* Mode toggle */}
-            <div className="bp-mode-toggle">
-              <button
-                className={`bp-mode-btn ${inputMode === 'auto' ? 'active' : ''}`}
-                onClick={() => { setInputMode('auto'); setCustomAmt('') }}>
-                {isFirstBid
-                  ? `⚡ Base price = ₹${nextAutoBid.toLocaleString()}`
-                  : `⚡ Auto +₹${bidIncrement} = ₹${nextAutoBid.toLocaleString()}`}
-              </button>
-              <button
-                className={`bp-mode-btn ${inputMode === 'manual' ? 'active' : ''}`}
-                onClick={() => setInputMode('manual')}>
-                ✏️ Custom Amount
-              </button>
-            </div>
-
-            {/* Manual input */}
-            <AnimatePresence>
-              {inputMode === 'manual' && (
-                <motion.div
-                  className="bp-manual-row"
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}>
-                  <span className="bp-rupee">₹</span>
+            <div className="bd-action-row">
+              {/* Stepper */}
+              <div className="bd-stepper">
+                <button className="bd-step" onClick={() => step(-1)}>−</button>
+                <div className="bd-amount">
+                  <span>₹</span>
                   <input
                     type="number"
-                    className="bp-amount-input"
-                    placeholder={`Min ₹${minBid}`}
-                    value={customAmt}
-                    onChange={e => setCustomAmt(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleSubmitBid()}
-                    autoFocus
+                    value={amount || ''}
                     min={minBid}
-                    max={selectedCap ? selectedCap.maxBid : undefined}
+                    max={limit || undefined}
+                    onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleConfirm()}
                   />
-                </motion.div>
-              )}
-            </AnimatePresence>
+                </div>
+                <button className="bd-step" onClick={() => step(1)}>+</button>
+              </div>
 
-            {/* Final amount preview */}
-            <div className="bp-final-amount">
-              <span className="bp-final-label">Bid Amount</span>
-              <span
-                className="bp-final-value"
-                style={{ color: selected.teamColor || '#e63946' }}>
-                ₹{effectiveAmount.toLocaleString()}
-              </span>
+              {/* Quick amounts */}
+              <div className="bd-quick">
+                {quickAmounts.map((amt, i) => (
+                  <button
+                    key={amt}
+                    className={`bd-q ${amount === amt ? 'active' : ''}`}
+                    disabled={amt > limit}
+                    onClick={() => setAmount(amt)}>
+                    ₹{amt.toLocaleString()}
+                    {isFirstBid && i === 0 && <small>base</small>}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Submit */}
-            <motion.button
-              className="bp-submit-btn"
-              style={{ background: selected.teamColor || '#e63946' }}
-              onClick={handleSubmitBid}
-              disabled={submitting}
-              whileTap={{ scale: 0.97 }}>
+            <button
+              className="bd-confirm"
+              onClick={handleConfirm}
+              disabled={submitting || overLimit}>
               {submitting
                 ? '⏳ Placing bid...'
-                : `🔨 CONFIRM — ${selected.captainName.toUpperCase()}`}
-            </motion.button>
-
+                : overLimit
+                  ? `Over max ₹${Math.floor(limit).toLocaleString()}`
+                  : `🔨 ₹${(amount || 0).toLocaleString()} — ${selected.captainName.toUpperCase()}`}
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
-
     </div>
   )
 }
