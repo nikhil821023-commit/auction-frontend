@@ -678,16 +678,26 @@ export default function AuctionRoom() {
           </AnimatePresence>
 
           {bidMode === 'ORGANIZER_CONTROLLED' && (
-            <BidPanel
-              teams={teams}
-              teamsLoading={teamsLoading}
-              teamsError={teamsError}
-              onRetryTeams={loadTeams}
-              phase={phase}
-              tournamentId={Number(tid)}
-              bidIncrement={50}
-              currentBid={auctionState?.currentBid || 0}
-            />
+            
+<BidPanel
+  teams={teams}
+  teamsLoading={teamsLoading}
+  teamsError={teamsError}
+  onRetryTeams={loadTeams}
+  phase={phase}
+  tournamentId={Number(tid)}
+  bidIncrement={auctionState?.bidIncrement
+    || dashboard?.bidIncrement || 50}
+  currentBid={auctionState?.currentBid || 0}
+  basePrice={
+    auctionState?.currentPlayerBasePrice   
+    || spinResult?.basePrice               
+    || 0
+  }
+  hasBids={
+    !!(auctionState?.highBidderTeamId)     
+  }
+/>
           )}
 
           {bidMode === 'CAPTAIN_SELF' && (
