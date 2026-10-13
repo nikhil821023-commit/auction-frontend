@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Teko:wght@400;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Teko:wght@400;600;700&display=swap');
 
 
 /* ── Design tokens ────────────────────────────────────────────────── */
@@ -2035,7 +2035,6 @@ h1,h2,h3 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; }
 ══════════════════════════════════════════════════════════════════ */
 
 /* Import display font for projector */
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Teko:wght@400;600;700&display=swap');
 
 .pv-bg {
   min-height: 100vh;
@@ -2916,10 +2915,6 @@ h1,h2,h3 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; }
 }
 
 
-export const teamSquadCardCSS = `
-/* ══════════════════════════════════════════════════════════════════
-   TEAM SQUAD CARD — Dashboard
-══════════════════════════════════════════════════════════════════ */
  
 /* Dashboard grid */
 .dash-teams-grid {
