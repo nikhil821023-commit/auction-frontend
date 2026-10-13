@@ -2871,6 +2871,8 @@ h1,h2,h3 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; }
 .bp-quick-btn.active { background: var(--tc, #e63946); border-color: var(--tc, #e63946); color: #fff; }
 .bp-quick-btn.disabled, .bp-quick-btn:disabled { opacity: .35; cursor: not-allowed; }
 
+
+
 /* Add to index.css */
 
 /* Cap warning in confirm panel */
