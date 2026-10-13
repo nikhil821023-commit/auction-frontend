@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
-import { playerImageUrl } from '../pages/PlayerManage'
+import { playerImageUrl } from '../utils/imageUrl'
  
 const TIER_COLORS = {
   PLATINUM: '#e5c100',
