@@ -697,9 +697,9 @@ export default function AuctionRoom() {
   }
   hasBids={!!(auctionState?.highBidderTeamId)}
   maxSquadSize={
-    dashboard?.maxPlayersPerTeam    // ✅ from dashboard
-    || auctionState?.maxSquadSize   // ✅ from auction state
-    || 11                           // ✅ default
+    dashboard?.maxPlayersPerTeam      // ✅ from dashboard (most reliable)
+    || auctionState?.maxSquadSize     // ✅ from auction state
+    || null                           // ✅ null = no cap enforced
   }
 />
             
