@@ -14,7 +14,7 @@ export default function BidPanel({
   currentBid = 0,
   basePrice = 0,
   hasBids,
-  maxSquadSize = 11,
+  maxSquadSize = null,
 }) {
   const [selected, setSelected]     = useState(null)
   const [customAmt, setCustomAmt]   = useState('')
@@ -40,12 +40,19 @@ export default function BidPanel({
   // ── Smart Budget Cap ────────────────────────────────────────────
   const getSmartCap = (team) => {
     if (!team) return null
-    const squadSize   = maxSquadSize || 11
+
+    if (!maxSquadSize || maxSquadSize <= 0) return null
+
+
+    
+    const squadSize   = maxSquadSize 
     const bought      = team.playersBought || team.squadCount || 0
     const stillNeeded = squadSize - bought
     const budget      = team.remainingBudget ?? team.totalBudget ?? 0
 
     if (stillNeeded <= 1) return null // last player — no cap
+    if (!basePrice || basePrice <= 0) return null
+
 
     const reservedBudget = (stillNeeded - 1) * basePrice
     const maxBid         = budget - reservedBudget
