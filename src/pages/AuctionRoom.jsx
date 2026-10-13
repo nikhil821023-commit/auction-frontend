@@ -678,7 +678,8 @@ export default function AuctionRoom() {
           </AnimatePresence>
 
           {bidMode === 'ORGANIZER_CONTROLLED' && (
-            
+
+      // In AuctionRoom.jsx — update BidPanel call:
 <BidPanel
   teams={teams}
   teamsLoading={teamsLoading}
@@ -690,14 +691,19 @@ export default function AuctionRoom() {
     || dashboard?.bidIncrement || 50}
   currentBid={auctionState?.currentBid || 0}
   basePrice={
-    auctionState?.currentPlayerBasePrice   
-    || spinResult?.basePrice               
+    auctionState?.currentPlayerBasePrice
+    || spinResult?.basePrice
     || 0
   }
-  hasBids={
-    !!(auctionState?.highBidderTeamId)     
+  hasBids={!!(auctionState?.highBidderTeamId)}
+  maxSquadSize={
+    dashboard?.maxPlayersPerTeam    // ✅ from dashboard
+    || auctionState?.maxSquadSize   // ✅ from auction state
+    || 11                           // ✅ default
   }
 />
+            
+
           )}
 
           {bidMode === 'CAPTAIN_SELF' && (
